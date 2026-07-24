@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "../CartContext";
 import { stores } from "../lojas/stores";
 
-const centralWhatsapp = "551146155051";
+const centralWhatsapp = "5511940591588";
 
 export function CartClient() {
   const { items, itemCount, removeItem, updateQuantity, clearCart } = useCart();

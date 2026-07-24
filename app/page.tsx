@@ -1,5 +1,8 @@
 import { CategoryExplorer } from "./CategoryExplorer";
 import { CartHeaderLink } from "./CartLinks";
+import { SearchBar } from "./SearchBar";
+import { ThemeToggle } from "./ThemeToggle";
+import { FooterMap } from "./FooterMap";
 
 const benefits = [
   { icon: "🚚", title: "Entrega nacional", text: "Para todo o Brasil" },
@@ -8,7 +11,7 @@ const benefits = [
   { icon: "🔒", title: "Compra segura", text: "Seus dados protegidos" },
 ];
 
-const whatsapp = "https://api.whatsapp.com/send?phone=551146155051";
+const whatsapp = "https://api.whatsapp.com/send?phone=5511940591588";
 
 export default function Home() {
   return (
@@ -26,18 +29,15 @@ export default function Home() {
       <header className="site-header">
         <div className="container header-main">
           <a className="brand" href="#inicio" aria-label="Impakto Festas — início">
-            <img className="brand-logo" src="/impakto-logo.png" alt="" />
+            <img className="brand-logo" src="/impakto-logo.png" alt="" width={1056} height={321} fetchPriority="high" decoding="async" />
           </a>
 
-          <form className="search" action="#categorias">
-            <label className="sr-only" htmlFor="busca">Buscar produtos</label>
-            <input id="busca" name="q" placeholder="O que você está procurando?" />
-            <button type="submit" aria-label="Buscar">⌕</button>
-          </form>
+          <SearchBar />
 
           <div className="header-actions">
             <a href="/conta" aria-label="Acessar ou criar minha conta"><span aria-hidden="true">♙</span><b>Minha conta</b></a>
             <CartHeaderLink />
+            <ThemeToggle />
           </div>
         </div>
 
@@ -66,7 +66,14 @@ export default function Home() {
             </div>
 
             <div className="hero-visual" aria-label="Seleção profissional de artigos para festa com balões, decoração, descartáveis e bolo" role="img">
-              <img src="/hero-party-professional.png" alt="" />
+              <img
+                src="/hero-party-professional.jpg"
+                alt=""
+                width={1536}
+                height={1024}
+                fetchPriority="high"
+                decoding="async"
+              />
               <div className="hero-campaign"><span>IMPAKTO FESTAS</span><strong>Sua festa completa<br />em um só clique!</strong></div>
               <div className="hero-offer"><strong>5% OFF</strong><span>na primeira compra</span></div>
             </div>
@@ -85,11 +92,11 @@ export default function Home() {
           <div className="container">
             <div className="section-title"><div><span className="kicker">Seleção especial</span><h2>Motivos para comemorar</h2></div></div>
             <div className="offer-grid">
-              <article className="offer-card offer-main">
-                <div><span>OFERTAS DA SEMANA</span><h3>Preços que deixam a festa ainda melhor</h3><p>Uma seleção cheia de cor para você montar cada detalhe e economizar.</p><a href={whatsapp} target="_blank" rel="noreferrer">Pedir pelo WhatsApp →</a></div>
+              <a className="offer-card offer-main" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Pedir as ofertas da semana pelo WhatsApp">
+                <div><span>OFERTAS DA SEMANA</span><h3>Preços que deixam a festa ainda melhor</h3><p>Uma seleção cheia de cor para você montar cada detalhe e economizar.</p><span className="offer-card-link">Pedir pelo WhatsApp →</span></div>
                 <strong className="discount" aria-hidden="true">ATÉ<br /><b>50%</b></strong>
-              </article>
-              <article className="offer-card offer-side"><span>NOVIDADES</span><h3>Novos temas acabaram de chegar</h3><p>Ideias para aniversários, encontros e celebrações inesquecíveis.</p><a href="#categorias">Quero ver →</a></article>
+              </a>
+              <a className="offer-card offer-side" href="/departamentos/festas-tematicas" aria-label="Ver novidades no departamento de Festas Temáticas"><span>NOVIDADES</span><h3>Novos temas acabaram de chegar</h3><p>Ideias para aniversários, encontros e celebrações inesquecíveis.</p><span className="offer-card-link">Quero ver →</span></a>
             </div>
           </div>
         </section>
@@ -97,7 +104,7 @@ export default function Home() {
         <section className="store-locator-section section" aria-labelledby="store-locator-title">
           <div className="container store-locator-card">
             <div className="store-locator-icon store-locator-identity" aria-hidden="true">
-              <img src="/impakto-identity.png" alt="" />
+              <img src="/impakto-identity-360.jpg" alt="" width={360} height={360} loading="lazy" decoding="async" />
             </div>
             <div><span className="kicker">Visite a Impakto</span><h2 id="store-locator-title">Uma loja cheia de ideias para sua próxima festa.</h2><p>Consulte endereços, cidades e rotas de todas as nossas 13 filiais ativas.</p></div>
             <a className="button store-locator-button" href="/lojas">Encontre a loja mais próxima de você <span aria-hidden="true">→</span></a>
@@ -121,8 +128,8 @@ export default function Home() {
           </section>
 
           <section className="footer-contact-card" aria-labelledby="footer-whatsapp">
-            <div className="footer-contact-title"><img className="footer-whatsapp-icon" src="/whatsapp-logo.jpg" alt="" aria-hidden="true" /><h3 id="footer-whatsapp">WhatsApp</h3></div>
-            <a className="footer-highlight" href={whatsapp} target="_blank" rel="noreferrer">(11) 4615-5051</a>
+            <div className="footer-contact-title"><img className="footer-whatsapp-icon" src="/whatsapp-logo.jpg" alt="" aria-hidden="true" width={1200} height={1200} loading="lazy" decoding="async" /><h3 id="footer-whatsapp">WhatsApp</h3></div>
+            <a className="footer-highlight" href={whatsapp} target="_blank" rel="noreferrer">(11) 94059-1588</a>
             <p>Fale diretamente com nossa equipe pelo WhatsApp.</p>
           </section>
 
@@ -132,22 +139,15 @@ export default function Home() {
             <address><span aria-hidden="true">⌖</span><span>Estr. do Embu, 320<br />Jardim Torino, Cotia — SP<br />CEP 06713-100</span></address>
           </section>
 
-          <section className="footer-map-card" aria-label="Localização da Impakto Festas">
-            <iframe
-              title="Mapa da Impakto Festas em Cotia"
-              src="https://www.google.com/maps?q=Estrada%20do%20Embu%2C%20320%2C%20Jardim%20Torino%2C%20Cotia%2C%20SP%2C%2006713-100&output=embed"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-            />
-            <a href="https://www.google.com/maps/search/?api=1&query=Estrada%20do%20Embu%2C%20320%2C%20Jardim%20Torino%2C%20Cotia%2C%20SP%2C%2006713-100" target="_blank" rel="noreferrer">Abrir no Google Maps ↗</a>
-          </section>
+          <FooterMap />
         </div>
         <div className="container footer-secondary">
           <section>
             <h3>Navegação</h3>
             <nav className="footer-link-list" aria-label="Navegação do rodapé">
               <a href="/">Página inicial</a>
+              <a href="/quem-somos">Quem somos</a>
+              <a href="/politica-de-cookies">Política de cookies</a>
               <a href="/#categorias">Departamentos</a>
               <a href="/lojas">Nossas lojas</a>
             </nav>
@@ -163,20 +163,20 @@ export default function Home() {
           <section>
             <h3>Redes sociais</h3>
             <a className="footer-social-link" href="https://www.instagram.com/impaktofestas/?hl=pt" target="_blank" rel="noreferrer" aria-label="Acessar o Instagram da Impakto Festas">
-              <img src="/instagram-logo.webp" alt="" />
+              <img src="/instagram-logo.webp" alt="" width={600} height={600} loading="lazy" decoding="async" />
               <span><strong>Instagram</strong><small>@impaktofestas</small></span>
             </a>
           </section>
           <section className="footer-brand-promo">
             <h3>Conheça nossas soluções profissionais em limpeza, higiene e descartáveis.</h3>
-            <a href="https://www.impakto.com.br/" target="_blank" rel="noreferrer" aria-label="Acessar o site da Impakto Higiene, Limpeza e Descartáveis"><img src="/impakto-profissional.png" alt="Impakto Higiene, Limpeza e Descartáveis" /></a>
+            <a href="https://www.impakto.com.br/" target="_blank" rel="noreferrer" aria-label="Acessar o site da Impakto Higiene, Limpeza e Descartáveis"><img src="/impakto-profissional.png" alt="Impakto Higiene, Limpeza e Descartáveis" width={1928} height={1140} loading="lazy" decoding="async" /></a>
             <a href="https://www.impakto.com.br/" target="_blank" rel="noreferrer">Acesse nosso site →</a>
           </section>
         </div>
         <div className="container footer-bottom"><span>© 2026 Impakto Festas. Todos os direitos reservados.</span><span>Compra segura • Entrega para todo o Brasil</span></div>
       </footer>
 
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" /></a>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" width={1200} height={1200} decoding="async" /></a>
     </>
   );
 }

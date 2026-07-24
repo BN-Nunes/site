@@ -7,11 +7,32 @@ import { getSupabaseBrowserClient, isSupabaseConfigured } from "../supabase-clie
 
 type AccountMode = "login" | "register" | "forgot" | "recovery";
 type Feedback = { type: "success" | "error"; text: string } | null;
+type DashboardPanel = "profile" | "orders" | "address" | null;
+type CustomerAddress = {
+  postal_code: string;
+  street: string;
+  number: string;
+  complement: string;
+  district: string;
+  city: string;
+  state: string;
+};
+
+const emptyAddress: CustomerAddress = {
+  postal_code: "",
+  street: "",
+  number: "",
+  complement: "",
+  district: "",
+  city: "",
+  state: "",
+};
 
 function friendlyAuthError(message: string) {
   const normalized = message.toLowerCase();
   if (normalized.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
   if (normalized.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+  if (normalized.includes("email address not authorized")) return "O envio de confirmação ainda não está liberado para este endereço. Configure o SMTP do projeto.";
   if (normalized.includes("user already registered")) return "Já existe uma conta com este e-mail.";
   if (normalized.includes("password should be")) return "A senha não atende aos requisitos de segurança.";
   if (normalized.includes("rate limit")) return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
@@ -24,10 +45,17 @@ export function AccountClient() {
   const [ready, setReady] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [canResendConfirmation, setCanResendConfirmation] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [activePanel, setActivePanel] = useState<DashboardPanel>(null);
+  const [dashboardSaving, setDashboardSaving] = useState(false);
+  const [dashboardFeedback, setDashboardFeedback] = useState<Feedback>(null);
+  const [profileName, setProfileName] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [address, setAddress] = useState<CustomerAddress>(emptyAddress);
 
   const configured = isSupabaseConfigured();
 
@@ -55,6 +83,19 @@ export function AccountClient() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!session) return;
+    const metadata = session.user.user_metadata ?? {};
+    setProfileName(typeof metadata.full_name === "string" ? metadata.full_name : "");
+    setProfilePhone(typeof metadata.phone === "string" ? metadata.phone : "");
+    const savedAddress = metadata.address;
+    if (savedAddress && typeof savedAddress === "object") {
+      setAddress({ ...emptyAddress, ...(savedAddress as Partial<CustomerAddress>) });
+    } else {
+      setAddress(emptyAddress);
+    }
+  }, [session]);
+
   const displayName = useMemo(() => {
     const metadataName = session?.user.user_metadata?.full_name;
     return typeof metadataName === "string" && metadataName.trim() ? metadataName : "Cliente Impakto";
@@ -63,8 +104,35 @@ export function AccountClient() {
   function switchMode(nextMode: AccountMode) {
     setMode(nextMode);
     setFeedback(null);
+    setCanResendConfirmation(false);
     setPassword("");
     setPasswordConfirmation("");
+  }
+
+  async function resendConfirmation() {
+    const supabase = getSupabaseBrowserClient();
+    const normalizedEmail = email.trim();
+    if (!supabase || !normalizedEmail) {
+      setFeedback({ type: "error", text: "Informe o e-mail usado no cadastro." });
+      return;
+    }
+
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: normalizedEmail,
+        options: { emailRedirectTo: `${window.location.origin}/conta` },
+      });
+      if (error) throw error;
+      setFeedback({ type: "success", text: "Enviamos novamente o e-mail de confirmação. Verifique também a pasta de spam." });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      setFeedback({ type: "error", text: friendlyAuthError(message) });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -125,6 +193,7 @@ export function AccountClient() {
         setFeedback(data.session
           ? { type: "success", text: "Conta criada. Você já está conectado." }
           : { type: "success", text: "Conta criada! Abra seu e-mail para confirmar o cadastro." });
+        setCanResendConfirmation(!data.session);
         return;
       }
 
@@ -133,6 +202,7 @@ export function AccountClient() {
       setFeedback({ type: "success", text: "Login realizado com sucesso." });
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
+      setCanResendConfirmation(message.toLowerCase().includes("email not confirmed"));
       setFeedback({ type: "error", text: friendlyAuthError(message) });
     } finally {
       setSubmitting(false);
@@ -147,6 +217,57 @@ export function AccountClient() {
     setSubmitting(false);
     if (error) setFeedback({ type: "error", text: "Não foi possível sair da conta." });
     else switchMode("login");
+  }
+
+  function toggleDashboardPanel(panel: Exclude<DashboardPanel, null>) {
+    setDashboardFeedback(null);
+    setActivePanel((current) => current === panel ? null : panel);
+  }
+
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase || !session) return;
+    if (profileName.trim().length < 3) {
+      setDashboardFeedback({ type: "error", text: "Informe seu nome completo." });
+      return;
+    }
+
+    setDashboardSaving(true);
+    setDashboardFeedback(null);
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        ...session.user.user_metadata,
+        full_name: profileName.trim(),
+        phone: profilePhone.trim(),
+      },
+    });
+    setDashboardSaving(false);
+    setDashboardFeedback(error
+      ? { type: "error", text: "Não foi possível salvar seus dados." }
+      : { type: "success", text: "Seus dados foram atualizados." });
+  }
+
+  async function saveAddress(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase || !session) return;
+
+    setDashboardSaving(true);
+    setDashboardFeedback(null);
+    const normalizedAddress = Object.fromEntries(
+      Object.entries(address).map(([key, value]) => [key, value.trim()]),
+    ) as CustomerAddress;
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        ...session.user.user_metadata,
+        address: normalizedAddress,
+      },
+    });
+    setDashboardSaving(false);
+    setDashboardFeedback(error
+      ? { type: "error", text: "Não foi possível salvar o endereço." }
+      : { type: "success", text: "Endereço principal salvo com sucesso." });
   }
 
   if (!configured) {
@@ -172,10 +293,53 @@ export function AccountClient() {
           <button type="button" onClick={signOut} disabled={submitting}>Sair da conta</button>
         </div>
         <div className="customer-dashboard-grid">
-          <article><span aria-hidden="true">♙</span><div><strong>Meus dados</strong><p>Nome e e-mail da sua conta.</p></div><small>Conta ativa</small></article>
-          <article><span aria-hidden="true">▣</span><div><strong>Meus pedidos</strong><p>Seus pedidos aparecerão aqui.</p></div><small>Em breve</small></article>
-          <article><span aria-hidden="true">⌖</span><div><strong>Meus endereços</strong><p>Endereços para entrega e cobrança.</p></div><small>Em breve</small></article>
+          <button className={activePanel === "profile" ? "is-active" : ""} type="button" onClick={() => toggleDashboardPanel("profile")} aria-expanded={activePanel === "profile"}>
+            <span aria-hidden="true">♙</span><div><strong>Meus dados</strong><p>Nome, e-mail e telefone da sua conta.</p></div><small>Conta ativa</small>
+          </button>
+          <button className={activePanel === "orders" ? "is-active" : ""} type="button" onClick={() => toggleDashboardPanel("orders")} aria-expanded={activePanel === "orders"}>
+            <span aria-hidden="true">▣</span><div><strong>Meus pedidos</strong><p>Acompanhe suas solicitações.</p></div><small>Histórico</small>
+          </button>
+          <button className={activePanel === "address" ? "is-active" : ""} type="button" onClick={() => toggleDashboardPanel("address")} aria-expanded={activePanel === "address"}>
+            <span aria-hidden="true">⌖</span><div><strong>Meus endereços</strong><p>Cadastre seu endereço principal.</p></div><small>Cadastro</small>
+          </button>
         </div>
+
+        {activePanel === "profile" && (
+          <section className="customer-detail-panel" aria-labelledby="profile-panel-title">
+            <div className="customer-panel-heading"><div><span>Informações pessoais</span><h3 id="profile-panel-title">Meus dados</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus dados">×</button></div>
+            <form className="customer-form" onSubmit={saveProfile}>
+              <label><span>Nome completo</span><input type="text" autoComplete="name" value={profileName} onChange={(event) => setProfileName(event.target.value)} required /></label>
+              <label><span>E-mail</span><input type="email" value={session.user.email ?? ""} readOnly aria-readonly="true" /></label>
+              <label className="customer-form-wide"><span>Telefone / WhatsApp</span><input type="tel" autoComplete="tel" inputMode="tel" value={profilePhone} onChange={(event) => setProfilePhone(event.target.value)} placeholder="(11) 99999-9999" /></label>
+              {dashboardFeedback && <div className={`account-feedback ${dashboardFeedback.type} customer-form-wide`} role="status">{dashboardFeedback.text}</div>}
+              <div className="customer-form-actions customer-form-wide"><button type="submit" disabled={dashboardSaving}>{dashboardSaving ? "Salvando…" : "Salvar meus dados"}</button></div>
+            </form>
+          </section>
+        )}
+
+        {activePanel === "orders" && (
+          <section className="customer-detail-panel" aria-labelledby="orders-panel-title">
+            <div className="customer-panel-heading"><div><span>Histórico da conta</span><h3 id="orders-panel-title">Meus pedidos</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus pedidos">×</button></div>
+            <div className="customer-empty-orders"><span aria-hidden="true">▣</span><h4>Nenhum pedido registrado</h4><p>Quando houver solicitações vinculadas à sua conta, elas aparecerão aqui.</p><a href="/#categorias">Explorar departamentos</a></div>
+          </section>
+        )}
+
+        {activePanel === "address" && (
+          <section className="customer-detail-panel" aria-labelledby="address-panel-title">
+            <div className="customer-panel-heading"><div><span>Endereço principal</span><h3 id="address-panel-title">Meus endereços</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus endereços">×</button></div>
+            <form className="customer-form customer-address-form" onSubmit={saveAddress}>
+              <label><span>CEP</span><input type="text" inputMode="numeric" autoComplete="postal-code" value={address.postal_code} onChange={(event) => setAddress((current) => ({ ...current, postal_code: event.target.value }))} placeholder="00000-000" required /></label>
+              <label className="customer-form-street"><span>Rua / Avenida</span><input type="text" autoComplete="address-line1" value={address.street} onChange={(event) => setAddress((current) => ({ ...current, street: event.target.value }))} required /></label>
+              <label><span>Número</span><input type="text" value={address.number} onChange={(event) => setAddress((current) => ({ ...current, number: event.target.value }))} required /></label>
+              <label><span>Complemento</span><input type="text" autoComplete="address-line2" value={address.complement} onChange={(event) => setAddress((current) => ({ ...current, complement: event.target.value }))} placeholder="Apartamento, bloco…" /></label>
+              <label><span>Bairro</span><input type="text" value={address.district} onChange={(event) => setAddress((current) => ({ ...current, district: event.target.value }))} required /></label>
+              <label><span>Cidade</span><input type="text" autoComplete="address-level2" value={address.city} onChange={(event) => setAddress((current) => ({ ...current, city: event.target.value }))} required /></label>
+              <label><span>Estado</span><input type="text" autoComplete="address-level1" maxLength={2} value={address.state} onChange={(event) => setAddress((current) => ({ ...current, state: event.target.value.toUpperCase() }))} placeholder="SP" required /></label>
+              {dashboardFeedback && <div className={`account-feedback ${dashboardFeedback.type} customer-form-wide`} role="status">{dashboardFeedback.text}</div>}
+              <div className="customer-form-actions customer-form-wide"><button type="submit" disabled={dashboardSaving}>{dashboardSaving ? "Salvando…" : "Salvar endereço"}</button></div>
+            </form>
+          </section>
+        )}
       </section>
     );
   }
@@ -212,6 +376,7 @@ export function AccountClient() {
       </form>
 
       <div className="account-form-footer">
+        {canResendConfirmation && <button type="button" onClick={resendConfirmation} disabled={submitting}>Reenviar e-mail de confirmação</button>}
         {mode === "login" && <button type="button" onClick={() => switchMode("forgot")}>Esqueci minha senha</button>}
         {(isForgot || isRecovery) && <button type="button" onClick={() => switchMode("login")}>← Voltar para o login</button>}
         <small>Ao continuar, você concorda com o uso dos seus dados para identificação e acesso à conta.</small>

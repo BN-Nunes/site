@@ -1,0 +1,50 @@
+/* Cookie notice and policy */
+.cookie-notice{position:fixed;z-index:1000;left:50%;bottom:22px;width:min(920px,calc(100% - 36px));display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding:16px 18px;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:#111a2b;color:#fff;box-shadow:0 18px 55px rgba(0,0,0,.3);transform:translateX(-50%)}
+.cookie-notice-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:rgba(255,212,59,.14);font-size:21px}
+.cookie-notice-copy strong{display:block;margin-bottom:4px;font-size:14px}
+.cookie-notice-copy p{margin:0;color:#d6def1;font-size:12px;line-height:1.55}
+.cookie-notice-actions{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.cookie-notice-actions a,.cookie-notice-actions button{min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border-radius:999px;font-size:12px;font-weight:900;cursor:pointer}
+.cookie-notice-actions a{border:1px solid rgba(255,255,255,.32);color:#fff}
+.cookie-notice-actions a:hover{border-color:var(--yellow);color:var(--yellow)}
+.cookie-notice-actions button{border:0;background:var(--yellow);color:#082c83}
+.cookie-notice-actions button:hover{background:#ffe273}
+.cookie-policy-main{background:var(--canvas)}
+.cookie-policy-hero{padding:72px 0 66px;background:#eef3ff}
+.cookie-policy-hero h1{margin:14px 0 16px;font-size:clamp(48px,6vw,78px);line-height:.95;letter-spacing:-.06em}
+.cookie-policy-hero p{max-width:720px;margin:0 0 16px;color:var(--muted);font-size:18px;line-height:1.6}
+.cookie-policy-hero small{color:var(--muted);font-size:12px}
+.cookie-policy-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;align-items:start;gap:24px}
+.cookie-policy-card,.cookie-policy-summary{border:1px solid var(--line);border-radius:26px;background:#fff;box-shadow:0 16px 38px rgba(12,36,98,.07)}
+.cookie-policy-card{padding:46px 50px}
+.cookie-policy-card h2{margin:38px 0 12px;color:var(--blue-dark);font-size:23px;letter-spacing:-.025em}
+.cookie-policy-card h2:first-child{margin-top:0}
+.cookie-policy-card>p{margin:0;color:var(--muted);font-size:15px;line-height:1.75}
+.cookie-policy-card a{color:var(--blue);font-weight:850;text-decoration:underline;text-underline-offset:3px}
+.cookie-storage-list{display:grid;gap:12px;margin-top:22px}
+.cookie-storage-list section{padding:20px;border:1px solid var(--line);border-radius:17px;background:var(--canvas)}
+.cookie-storage-list section>div{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.cookie-storage-list strong{font-size:14px}
+.cookie-storage-list span{padding:5px 9px;border-radius:999px;background:var(--blue-soft);color:var(--blue-dark);font-size:9px;font-weight:950;text-transform:uppercase}
+.cookie-storage-list p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.55}
+.cookie-policy-summary{position:sticky;top:24px;padding:30px}
+.cookie-policy-summary>span{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#e3f7ee;color:var(--green);font-size:22px;font-weight:900}
+.cookie-policy-summary h2{margin:18px 0 14px;font-size:24px}
+.cookie-policy-summary ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.8}
+.cookie-policy-summary a{display:inline-block;margin-top:22px;color:var(--blue);font-size:12px;font-weight:900}
+html[data-theme="dark"] .cookie-policy-hero{background:#111a2b}
+html[data-theme="dark"] .cookie-policy-card,html[data-theme="dark"] .cookie-policy-summary{background:var(--surface)}
+html[data-theme="dark"] .cookie-policy-card h2{color:var(--ink)}
+html[data-theme="dark"] .cookie-storage-list section{background:var(--surface-raised)}
+html[data-theme="dark"] .cookie-storage-list span{color:var(--ink)}
+@media (max-width:900px){.cookie-policy-layout{grid-template-columns:1fr}.cookie-policy-summary{position:static;grid-row:1}}
+@media (max-width:680px){
+  .cookie-notice{grid-template-columns:auto 1fr;bottom:12px;width:calc(100% - 24px);padding:15px}
+  .cookie-notice-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+  .cookie-notice-actions a,.cookie-notice-actions button{width:100%}
+  .cookie-policy-hero{padding:50px 0}
+  .cookie-policy-hero h1{font-size:46px}
+  .cookie-policy-card{padding:30px 22px}
+  .cookie-policy-card h2{font-size:20px}
+  .cookie-storage-list section>div{align-items:flex-start;flex-direction:column}
+}

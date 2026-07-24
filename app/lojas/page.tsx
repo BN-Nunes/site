@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { StoresExplorer } from "./StoresExplorer";
+import { ThemeToggle } from "../ThemeToggle";
 
 export const metadata: Metadata = {
   title: "Nossas lojas | Impakto Festas",
   description: "Encontre a unidade Impakto Festas mais próxima de você.",
 };
 
-const whatsapp = "https://api.whatsapp.com/send?phone=551146155051";
+const whatsapp = "https://api.whatsapp.com/send?phone=5511940591588";
 
 export default function StoresPage() {
   return (
@@ -17,7 +18,7 @@ export default function StoresPage() {
       <header className="stores-header">
         <div className="container stores-header-inner">
           <a className="brand" href="/" aria-label="Voltar para a página inicial"><img className="brand-logo" src="/impakto-logo.png" alt="Impakto Artigos para Festas" /></a>
-          <nav aria-label="Navegação da página de lojas"><a href="/">← Voltar para o início</a><a className="stores-whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Falar no WhatsApp</a></nav>
+          <nav aria-label="Navegação da página de lojas"><a href="/">← Voltar para o início</a><a className="stores-whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Falar no WhatsApp</a><ThemeToggle /></nav>
         </div>
       </header>
 

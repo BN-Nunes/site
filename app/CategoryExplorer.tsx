@@ -6,7 +6,6 @@ export function CategoryExplorer() {
       <div className="container">
         <div className="section-title">
           <div><span className="kicker">Encontre rapidinho</span><h2>Departamentos em destaque</h2></div>
-          <span className="category-guide-note">Escolha um departamento <span aria-hidden="true">→</span></span>
         </div>
 
         <div className="category-grid" role="list" aria-label="Departamentos">
@@ -18,9 +17,8 @@ export function CategoryExplorer() {
               aria-label={`Acessar o departamento ${department.name}`}
               key={department.slug}
             >
-              <span className="category-art" aria-hidden="true">{department.icon}</span>
+              <span className="category-art" aria-hidden="true"><span className="category-icon">{department.icon}</span></span>
               <strong>{department.name}</strong>
-              <small>Acessar departamento <span aria-hidden="true">→</span></small>
             </a>
           ))}
         </div>

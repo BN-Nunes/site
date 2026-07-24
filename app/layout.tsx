@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { CartProvider } from "./CartContext";
+import { CookieNotice } from "./CookieNotice";
 import "./globals.css";
+import "./cookies.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -30,5 +32,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body><CartProvider>{children}</CartProvider></body></html>;
+  return <html lang="pt-BR" suppressHydrationWarning><head><script src="/theme-init.js" /></head><body><CartProvider>{children}<CookieNotice /></CartProvider></body></html>;
 }

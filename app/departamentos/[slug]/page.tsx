@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { departments, getDepartment } from "../departments";
 import { AddToCartButton } from "../AddToCartButton";
 import { CartNavLink } from "../../CartLinks";
+import { ThemeToggle } from "../../ThemeToggle";
+import { HomeReturnPopup } from "../HomeReturnPopup";
 
 type DepartmentPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-const whatsapp = "https://api.whatsapp.com/send?phone=551146155051";
+const whatsapp = "https://api.whatsapp.com/send?phone=5511940591588";
 
 export function generateStaticParams() {
   return departments.map((department) => ({ slug: department.slug }));
@@ -37,7 +39,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
       <header className="department-header">
         <div className="container department-header-inner">
           <a className="brand" href="/" aria-label="Voltar para a página inicial"><img className="brand-logo" src="/impakto-logo.png" alt="Impakto Artigos para Festas" /></a>
-          <nav aria-label="Navegação do departamento"><a href="/#categorias">← Todos os departamentos</a><a href="/lojas">Nossas lojas</a><CartNavLink /><a className="department-whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Falar no WhatsApp</a></nav>
+          <nav aria-label="Navegação do departamento"><a href="/#categorias">← Todos os departamentos</a><a href="/lojas">Nossas lojas</a><CartNavLink /><ThemeToggle /></nav>
         </div>
       </header>
 
@@ -50,7 +52,60 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
               <h1>{department.name}</h1>
               <p>{department.description}</p>
             </div>
-            <div className="department-hero-art" aria-hidden="true"><span>{department.icon}</span></div>
+            {department.slug === "festas-tematicas" ? (
+              <div className="department-hero-art confetti-showcase" aria-hidden="true">
+                <span className="confetti-popper">{department.icon}</span>
+                {Array.from({ length: 12 }, (_, index) => (
+                  <i className={`confetti-particle confetti-particle-${index + 1}`} key={index} />
+                ))}
+              </div>
+            ) : department.slug === "confeitaria" ? (
+              <div className="department-hero-art cupcake-showcase" aria-hidden="true">
+                <div className="cupcake-stage">
+                  <i className="cupcake-ground-shadow" />
+                  <span className="cupcake-icon">{department.icon}</span>
+                  <span className="cupcake-candle">
+                    <i className="cupcake-wick" />
+                    <i className="cupcake-flame" />
+                  </span>
+                </div>
+              </div>
+            ) : department.slug === "descartaveis" ? (
+              <div className="department-hero-art drink-showcase" aria-hidden="true">
+                <div className="drink-stage">
+                  <span className="drink-cup-body">{department.icon}</span>
+                  <span className="drink-straw-top">{department.icon}</span>
+                  <i className="drink-sip-bubble drink-sip-bubble-1" />
+                  <i className="drink-sip-bubble drink-sip-bubble-2" />
+                  <i className="drink-sip-bubble drink-sip-bubble-3" />
+                </div>
+              </div>
+            ) : department.slug === "decoracao" ? (
+              <div className="department-hero-art stars-showcase" aria-hidden="true">
+                <div className="stars-orbit-stage">
+                  <span className="stars-orbit-group">{department.icon}</span>
+                </div>
+              </div>
+            ) : department.slug === "papelaria" ? (
+              <div className="department-hero-art gift-showcase" aria-hidden="true">
+                <div className="gift-stage">
+                  <span className="gift-icon">{department.icon}</span>
+                </div>
+              </div>
+            ) : department.slug === "ofertas" ? (
+              <div className="department-hero-art sale-showcase" aria-hidden="true">
+                <div className="sale-stage">
+                  <span className="sale-symbol">{department.icon}</span>
+                  {Array.from({ length: 8 }, (_, index) => (
+                    <i className={`sale-ray sale-ray-${index + 1}`} key={index} />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className={`department-hero-art${department.slug === "baloes" ? " single-balloon-showcase" : ""}`} aria-hidden="true">
+                <span>{department.icon}</span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -84,6 +139,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
       </main>
 
       <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" /><p>Quer confirmar a disponibilidade de um produto?</p><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
+      <HomeReturnPopup />
       <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" /></a>
     </>
   );
