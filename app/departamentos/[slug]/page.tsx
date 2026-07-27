@@ -73,8 +73,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
             ) : department.slug === "descartaveis" ? (
               <div className="department-hero-art drink-showcase" aria-hidden="true">
                 <div className="drink-stage">
-                  <span className="drink-cup-body">{department.icon}</span>
-                  <span className="drink-straw-top">{department.icon}</span>
+                  <span className="drink-icon">{department.icon}</span>
                   <i className="drink-sip-bubble drink-sip-bubble-1" />
                   <i className="drink-sip-bubble drink-sip-bubble-2" />
                   <i className="drink-sip-bubble drink-sip-bubble-3" />
@@ -140,7 +139,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
 
       <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" /><p>Quer confirmar a disponibilidade de um produto?</p><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
       <HomeReturnPopup />
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" /></a>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" /></a>
     </>
   );
 }

@@ -128,7 +128,7 @@ export default function Home() {
           </section>
 
           <section className="footer-contact-card" aria-labelledby="footer-whatsapp">
-            <div className="footer-contact-title"><img className="footer-whatsapp-icon" src="/whatsapp-logo.jpg" alt="" aria-hidden="true" width={1200} height={1200} loading="lazy" decoding="async" /><h3 id="footer-whatsapp">WhatsApp</h3></div>
+            <div className="footer-contact-title"><img className="footer-whatsapp-icon" src="/whatsapp-logo.png" alt="" aria-hidden="true" width={200} height={200} loading="lazy" decoding="async" /><h3 id="footer-whatsapp">WhatsApp</h3></div>
             <a className="footer-highlight" href={whatsapp} target="_blank" rel="noreferrer">(11) 94059-1588</a>
             <p>Fale diretamente com nossa equipe pelo WhatsApp.</p>
           </section>
@@ -176,7 +176,7 @@ export default function Home() {
         <div className="container footer-bottom"><span>© 2026 Impakto Festas. Todos os direitos reservados.</span><span>Compra segura • Entrega para todo o Brasil</span></div>
       </footer>
 
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" width={1200} height={1200} decoding="async" /></a>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" width={200} height={200} decoding="async" /></a>
     </>
   );
 }

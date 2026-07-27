@@ -190,19 +190,16 @@ main{overflow:hidden}.hero{background:linear-gradient(180deg,#f8faff,#fff)}.hero
 @keyframes cupcake-flame-flicker{0%{transform:translateX(-50%) rotate(-7deg) scale(.88,1.03);filter:brightness(.96)}45%{transform:translateX(-50%) rotate(5deg) scale(1.04,.91)}100%{transform:translateX(-50%) rotate(9deg) scale(.92,1.08);filter:brightness(1.12)}}
 @keyframes cupcake-shadow-settle{0%{opacity:0;transform:translateX(-50%) scaleX(.3)}100%{opacity:1;transform:translateX(-50%) scaleX(.9)}}
 
-/* Cup and straw move in a gentle repeating sip cycle */
+/* Cup wobbles gently as a single icon, like a light sip motion */
 .department-hero-art.drink-showcase{overflow:hidden}
 .drink-stage{position:relative;z-index:2;isolation:isolate;width:175px;height:175px;transform:rotate(4deg)}
 .drink-stage:before{content:"";position:absolute;z-index:0;left:50%;top:52%;width:122px;height:132px;border-radius:48%;background:radial-gradient(ellipse,rgba(0,63,52,.2) 0,rgba(0,63,52,.09) 42%,transparent 72%);filter:blur(10px);transform:translate(-50%,-50%)}
 .drink-stage:after{content:"";position:absolute;z-index:1;left:50%;bottom:24px;width:82px;height:19px;border-radius:50%;background:rgba(0,53,45,.3);filter:blur(8px);transform:translateX(-50%) scaleX(.9)}
-.drink-cup-body,.drink-straw-top{position:absolute;left:50%;top:50%;font-size:112px;line-height:1;filter:drop-shadow(0 7px 6px rgba(0,52,45,.18)) drop-shadow(0 16px 18px rgba(0,35,30,.18));transform:translate(-50%,-50%)}
-.drink-cup-body{z-index:2;clip-path:inset(30% 0 0 0);transform-origin:50% 82%;animation:drink-cup-sip 3.2s ease-in-out infinite}
-.drink-straw-top{z-index:3;clip-path:inset(0 0 64% 0);transform-origin:50% 36%;animation:drink-straw-sip 3.2s ease-in-out infinite}
+.drink-icon{position:absolute;z-index:2;left:50%;top:50%;font-size:112px;line-height:1;filter:drop-shadow(0 7px 6px rgba(0,52,45,.18)) drop-shadow(0 16px 18px rgba(0,35,30,.18));transform-origin:50% 82%;transform:translate(-50%,-50%);animation:drink-icon-sip 3.2s ease-in-out infinite}
 .drink-sip-bubble{position:absolute;z-index:4;left:95px;top:46px;width:5px;height:5px;border:1px solid rgba(255,255,255,.95);border-radius:50%;background:rgba(125,224,255,.82);opacity:0;animation:drink-bubble-rise 3.2s ease-out infinite}
 .drink-sip-bubble-2{left:101px;top:50px;width:4px;height:4px;animation-delay:.12s}
 .drink-sip-bubble-3{left:98px;top:55px;width:3px;height:3px;animation-delay:.24s}
-@keyframes drink-cup-sip{0%,18%,48%,100%{transform:translate(-50%,-50%) rotate(0) scale(1)}25%{transform:translate(-50%,-48%) rotate(-2deg) scale(.98,1.02)}33%{transform:translate(-50%,-47%) rotate(2deg) scale(1.025,.955)}40%{transform:translate(-50%,-49%) rotate(-1deg) scale(.99,1.01)}}
-@keyframes drink-straw-sip{0%,18%,48%,100%{transform:translate(-50%,-50%) rotate(0)}24%{transform:translate(-51%,-53%) rotate(-5deg)}31%{transform:translate(-49%,-55%) rotate(5deg)}38%{transform:translate(-51%,-52%) rotate(-3deg)}44%{transform:translate(-50%,-50%) rotate(0)}}
+@keyframes drink-icon-sip{0%,18%,48%,100%{transform:translate(-50%,-50%) rotate(0) scale(1)}25%{transform:translate(-50%,-50%) rotate(-4deg) scale(.98,1.02)}33%{transform:translate(-50%,-50%) rotate(4deg) scale(1.02,.98)}40%{transform:translate(-50%,-50%) rotate(-2deg) scale(.99,1.01)}}
 @keyframes drink-bubble-rise{0%,20%{opacity:0;transform:translate(0,10px) scale(.5)}25%{opacity:.9}40%{opacity:0;transform:translate(-3px,-24px) scale(1.1)}41%,100%{opacity:0}}
 
 /* The original sparkle stays intact and follows a very subtle orbit */

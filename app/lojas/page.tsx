@@ -36,7 +36,7 @@ export default function StoresPage() {
       </main>
 
       <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" /><p>Precisa de ajuda para escolher uma loja?</p><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" /></a>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" /></a>
     </>
   );
 }

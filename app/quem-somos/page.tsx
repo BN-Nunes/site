@@ -55,7 +55,7 @@ export default function AboutPage() {
       </main>
 
       <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" /><p>Conheça nossas lojas e encontre tudo para sua festa.</p><a href="/lojas">Encontrar uma loja →</a></div></footer>
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.jpg" alt="" /></a>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" /></a>
     </>
   );
 }
