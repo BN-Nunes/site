@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { CategoryExplorer } from "./CategoryExplorer";
 import { CartHeaderLink } from "./CartLinks";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { FooterMap } from "./FooterMap";
+import { ManageCookiesLink } from "./ManageCookiesLink";
+import { canonicalUrl } from "./lib/site-config";
+import { siteContacts } from "./lib/site-contacts";
+import { organizationJsonLd } from "./lib/structured-data";
+
+export const metadata: Metadata = {
+  alternates: { canonical: canonicalUrl("/") },
+};
 
 const benefits = [
   { icon: "🚚", title: "Entrega nacional", text: "Para todo o Brasil" },
@@ -11,11 +21,12 @@ const benefits = [
   { icon: "🔒", title: "Compra segura", text: "Seus dados protegidos" },
 ];
 
-const whatsapp = "https://api.whatsapp.com/send?phone=5511940591588";
+const whatsapp = siteContacts.whatsapp.baseUrl;
 
 export default function Home() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
       <a className="skip-link" href="#conteudo">Pular para o conteúdo</a>
 
       <div className="utility-bar">
@@ -35,7 +46,7 @@ export default function Home() {
           <SearchBar />
 
           <div className="header-actions">
-            <a href="/conta" aria-label="Acessar ou criar minha conta"><span aria-hidden="true">♙</span><b>Minha conta</b></a>
+            <Link href="/conta" aria-label="Acessar ou criar minha conta"><span aria-hidden="true">♙</span><b>Minha conta</b></Link>
             <CartHeaderLink />
             <ThemeToggle />
           </div>
@@ -47,7 +58,7 @@ export default function Home() {
               ["Festas", "/departamentos/festas-tematicas"], ["Descartáveis", "/departamentos/descartaveis"],
               ["Confeitaria", "/departamentos/confeitaria"], ["Decoração", "/departamentos/decoracao"],
               ["Papelaria", "/departamentos/papelaria"], ["Nossas lojas", "/lojas"], ["Ofertas", "/departamentos/ofertas"],
-            ].map(([label, href]) => <a className={label === "Ofertas" ? "nav-offer" : ""} href={href} key={label}>{label}</a>)}
+            ].map(([label, href]) => <Link className={label === "Ofertas" ? "nav-offer" : ""} href={href} key={label}>{label}</Link>)}
           </div>
         </nav>
       </header>
@@ -86,6 +97,7 @@ export default function Home() {
           <div className="container benefit-grid">
             {benefits.map((benefit) => <div className="benefit" key={benefit.title}><span aria-hidden="true">{benefit.icon}</span><div><strong>{benefit.title}</strong><small>{benefit.text}</small></div></div>)}
           </div>
+          <p className="benefit-disclaimer container">Desconto e parcelamento sujeitos a confirmação pela filial no atendimento. Este site não processa pagamentos.</p>
         </section>
 
         <section className="offers-section section" id="ofertas">
@@ -93,10 +105,10 @@ export default function Home() {
             <div className="section-title"><div><span className="kicker">Seleção especial</span><h2>Motivos para comemorar</h2></div></div>
             <div className="offer-grid">
               <a className="offer-card offer-main" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Pedir as ofertas da semana pelo WhatsApp">
-                <div><span>OFERTAS DA SEMANA</span><h3>Preços que deixam a festa ainda melhor</h3><p>Uma seleção cheia de cor para você montar cada detalhe e economizar.</p><span className="offer-card-link">Pedir pelo WhatsApp →</span></div>
+                <div><span>OFERTAS DA SEMANA</span><h3>Preços que deixam a festa ainda melhor</h3><p>Uma seleção cheia de cor para você montar cada detalhe e economizar.</p><small className="offer-disclaimer">Percentual e condições confirmados pela filial no atendimento.</small><span className="offer-card-link">Pedir pelo WhatsApp →</span></div>
                 <strong className="discount" aria-hidden="true">ATÉ<br /><b>50%</b></strong>
               </a>
-              <a className="offer-card offer-side" href="/departamentos/festas-tematicas" aria-label="Ver novidades no departamento de Festas Temáticas"><span>NOVIDADES</span><h3>Novos temas acabaram de chegar</h3><p>Ideias para aniversários, encontros e celebrações inesquecíveis.</p><span className="offer-card-link">Quero ver →</span></a>
+              <Link className="offer-card offer-side" href="/departamentos/festas-tematicas" aria-label="Ver novidades no departamento de Festas Temáticas"><span>NOVIDADES</span><h3>Novos temas acabaram de chegar</h3><p>Ideias para aniversários, encontros e celebrações inesquecíveis.</p><span className="offer-card-link">Quero ver →</span></Link>
             </div>
           </div>
         </section>
@@ -107,14 +119,17 @@ export default function Home() {
               <img src="/impakto-identity-360.jpg" alt="" width={360} height={360} loading="lazy" decoding="async" />
             </div>
             <div><span className="kicker">Visite a Impakto</span><h2 id="store-locator-title">Uma loja cheia de ideias para sua próxima festa.</h2><p>Consulte endereços, cidades e rotas de todas as nossas 13 filiais ativas.</p></div>
-            <a className="button store-locator-button" href="/lojas">Encontre a loja mais próxima de você <span aria-hidden="true">→</span></a>
+            <Link className="button store-locator-button" href="/lojas">Encontre a loja mais próxima de você <span aria-hidden="true">→</span></Link>
           </div>
         </section>
 
         <section className="newsletter section" id="newsletter">
           <div className="container newsletter-card">
-            <div><span className="kicker">Novidades em primeira mão</span><h2>Receba dicas e promoções</h2><p>Inspiração para sua próxima festa, direto no seu e-mail.</p></div>
-            <form action="#newsletter"><label className="sr-only" htmlFor="email">Seu melhor e-mail</label><input id="email" name="email" type="email" placeholder="Seu melhor e-mail" required /><button type="submit">Quero receber</button></form>
+            <div><span className="kicker">Novidades em primeira mão</span><h2>Acompanhe nossas novidades</h2><p>Siga a Impakto Festas no Instagram ou fale com a gente pelo WhatsApp para receber dicas e promoções em primeira mão.</p></div>
+            <div className="hero-actions">
+              <a className="button button-red" href={siteContacts.instagram.url} target="_blank" rel="noreferrer">Seguir no Instagram <span aria-hidden="true">→</span></a>
+              <a className="text-link" href={whatsapp} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a>
+            </div>
           </div>
         </section>
       </main>
@@ -123,20 +138,20 @@ export default function Home() {
         <div className="container footer-contact-grid">
           <section className="footer-contact-card" aria-labelledby="footer-sac">
             <div className="footer-contact-title"><span aria-hidden="true">☎</span><h3 id="footer-sac">SAC</h3></div>
-            <a className="footer-highlight" href="tel:+5511939410125">(11) 93941-0125</a>
+            <a className="footer-highlight" href={`tel:+${siteContacts.sac.phoneE164}`}>{siteContacts.sac.phoneDisplay}</a>
             <p><span aria-hidden="true">◷</span> Segunda a sexta, das 9h às 17h.</p>
           </section>
 
           <section className="footer-contact-card" aria-labelledby="footer-whatsapp">
             <div className="footer-contact-title"><img className="footer-whatsapp-icon" src="/whatsapp-logo.png" alt="" aria-hidden="true" width={200} height={200} loading="lazy" decoding="async" /><h3 id="footer-whatsapp">WhatsApp</h3></div>
-            <a className="footer-highlight" href={whatsapp} target="_blank" rel="noreferrer">(11) 94059-1588</a>
+            <a className="footer-highlight" href={whatsapp} target="_blank" rel="noreferrer">{siteContacts.whatsapp.display}</a>
             <p>Fale diretamente com nossa equipe pelo WhatsApp.</p>
           </section>
 
           <section className="footer-contact-card" aria-labelledby="footer-contato">
             <div className="footer-contact-title"><span aria-hidden="true">✉</span><h3 id="footer-contato">Fale com a Impakto</h3></div>
-            <a className="footer-email" href="mailto:sac@impakto.com.br">sac@impakto.com.br</a>
-            <address><span aria-hidden="true">⌖</span><span>Estr. do Embu, 320<br />Jardim Torino, Cotia — SP<br />CEP 06713-100</span></address>
+            <a className="footer-email" href={`mailto:${siteContacts.sac.email}`}>{siteContacts.sac.email}</a>
+            <address><span aria-hidden="true">⌖</span><span>{siteContacts.headquarters.street}<br />{siteContacts.headquarters.district}, {siteContacts.headquarters.city} — {siteContacts.headquarters.state}<br />CEP {siteContacts.headquarters.postalCode}</span></address>
           </section>
 
           <FooterMap />
@@ -145,32 +160,34 @@ export default function Home() {
           <section>
             <h3>Navegação</h3>
             <nav className="footer-link-list" aria-label="Navegação do rodapé">
-              <a href="/">Página inicial</a>
-              <a href="/quem-somos">Quem somos</a>
-              <a href="/politica-de-cookies">Política de cookies</a>
-              <a href="/#categorias">Departamentos</a>
-              <a href="/lojas">Nossas lojas</a>
+              <Link href="/">Página inicial</Link>
+              <Link href="/quem-somos">Quem somos</Link>
+              <Link href="/politica-de-privacidade">Política de privacidade</Link>
+              <Link href="/politica-de-cookies">Política de cookies</Link>
+              <ManageCookiesLink />
+              <Link href="/#categorias">Departamentos</Link>
+              <Link href="/lojas">Nossas lojas</Link>
             </nav>
           </section>
           <section>
             <h3>Atendimento</h3>
             <nav className="footer-link-list" aria-label="Atendimento ao cliente">
-              <a href="/conta">Minha conta</a>
-              <a href="/carrinho">Carrinho de orçamento</a>
+              <Link href="/conta">Minha conta</Link>
+              <Link href="/carrinho">Carrinho de orçamento</Link>
               <a href={whatsapp} target="_blank" rel="noreferrer">Fale pelo WhatsApp</a>
             </nav>
           </section>
           <section>
             <h3>Redes sociais</h3>
-            <a className="footer-social-link" href="https://www.instagram.com/impaktofestas/?hl=pt" target="_blank" rel="noreferrer" aria-label="Acessar o Instagram da Impakto Festas">
+            <a className="footer-social-link" href={siteContacts.instagram.url} target="_blank" rel="noreferrer" aria-label="Acessar o Instagram da Impakto Festas">
               <img src="/instagram-logo.webp" alt="" width={600} height={600} loading="lazy" decoding="async" />
-              <span><strong>Instagram</strong><small>@impaktofestas</small></span>
+              <span><strong>Instagram</strong><small>{siteContacts.instagram.handle}</small></span>
             </a>
           </section>
           <section className="footer-brand-promo">
             <h3>Conheça nossas soluções profissionais em limpeza, higiene e descartáveis.</h3>
-            <a href="https://www.impakto.com.br/" target="_blank" rel="noreferrer" aria-label="Acessar o site da Impakto Higiene, Limpeza e Descartáveis"><img src="/impakto-profissional.png" alt="Impakto Higiene, Limpeza e Descartáveis" width={1928} height={1140} loading="lazy" decoding="async" /></a>
-            <a href="https://www.impakto.com.br/" target="_blank" rel="noreferrer">Acesse nosso site →</a>
+            <a href={siteContacts.professionalSiteUrl} target="_blank" rel="noreferrer" aria-label="Acessar o site da Impakto Higiene, Limpeza e Descartáveis"><img src="/impakto-profissional.png" alt="Impakto Higiene, Limpeza e Descartáveis" width={1928} height={1140} loading="lazy" decoding="async" /></a>
+            <a href={siteContacts.professionalSiteUrl} target="_blank" rel="noreferrer">Acesse nosso site →</a>
           </section>
         </div>
         <div className="container footer-bottom"><span>© 2026 Impakto Festas. Todos os direitos reservados.</span><span>Compra segura • Entrega para todo o Brasil</span></div>
