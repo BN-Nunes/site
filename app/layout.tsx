@@ -1,36 +1,32 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import Script from "next/script";
 import { CartProvider } from "./CartContext";
 import { CookieNotice } from "./CookieNotice";
+import { getSiteUrl } from "./lib/site-config";
 import "./globals.css";
 import "./cookies.css";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  const base = new URL(`${protocol}://${host}`);
-  const image = new URL("/og.png", base).toString();
+const base = new URL(getSiteUrl());
+const image = new URL("/og.png", base).toString();
 
-  return {
-    metadataBase: base,
+export const metadata: Metadata = {
+  metadataBase: base,
+  title: "Impakto Festas | Tudo para sua comemoração",
+  description: "Balões, temas, confeitaria, descartáveis e decoração para transformar qualquer momento em festa.",
+  openGraph: {
     title: "Impakto Festas | Tudo para sua comemoração",
-    description: "Balões, temas, confeitaria, descartáveis e decoração para transformar qualquer momento em festa.",
-    openGraph: {
-      title: "Impakto Festas | Tudo para sua comemoração",
-      description: "Variedade, preço justo e entrega para todo o Brasil.",
-      type: "website",
-      images: [{ url: image, width: 1792, height: 939, alt: "Impakto Festas — tudo para transformar qualquer momento em festa" }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: "Impakto Festas | Tudo para sua comemoração",
-      description: "Variedade, preço justo e entrega para todo o Brasil.",
-      images: [image],
-    },
-  };
-}
+    description: "Variedade, preço justo e entrega para todo o Brasil.",
+    type: "website",
+    images: [{ url: image, width: 1792, height: 939, alt: "Impakto Festas — tudo para transformar qualquer momento em festa" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Impakto Festas | Tudo para sua comemoração",
+    description: "Variedade, preço justo e entrega para todo o Brasil.",
+    images: [image],
+  },
+};
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR" suppressHydrationWarning><head><script src="/theme-init.js" /></head><body><CartProvider>{children}<CookieNotice /></CartProvider></body></html>;
+  return <html lang="pt-BR" suppressHydrationWarning><head><Script src="/theme-init.js" strategy="beforeInteractive" /></head><body><CartProvider>{children}<CookieNotice /></CartProvider></body></html>;
 }

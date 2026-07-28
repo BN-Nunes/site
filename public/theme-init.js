@@ -5,7 +5,7 @@
     document.documentElement.dataset.theme = savedTheme === "light" || savedTheme === "dark"
       ? savedTheme
       : systemDark ? "dark" : "light";
-  } catch (_) {
+  } catch {
     document.documentElement.dataset.theme = "light";
   }
 })();
