@@ -1,24 +1,38 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { StoresExplorer } from "./StoresExplorer";
 import { ThemeToggle } from "../ThemeToggle";
+import { ManageCookiesLink } from "../ManageCookiesLink";
+import { canonicalUrl } from "../lib/site-config";
+import { siteContacts } from "../lib/site-contacts";
+import { storeJsonLd } from "../lib/structured-data";
+import { stores } from "./stores";
 
 export const metadata: Metadata = {
   title: "Nossas lojas | Impakto Festas",
   description: "Encontre a unidade Impakto Festas mais próxima de você.",
+  alternates: { canonical: canonicalUrl("/lojas") },
 };
 
-const whatsapp = "https://api.whatsapp.com/send?phone=5511940591588";
+const whatsapp = siteContacts.whatsapp.baseUrl;
 
 export default function StoresPage() {
   return (
     <>
+      {stores.map((store) => (
+        <script
+          key={store.cnpj}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd(store)) }}
+        />
+      ))}
       <a className="skip-link" href="#filiais">Pular para as filiais</a>
       <div className="utility-bar"><span>13 lojas para receber você</span><i aria-hidden="true" /><span>Variedade para sua festa</span><i aria-hidden="true" /><span>Atendimento especializado</span></div>
 
       <header className="stores-header">
         <div className="container stores-header-inner">
-          <a className="brand" href="/" aria-label="Voltar para a página inicial"><img className="brand-logo" src="/impakto-logo.png" alt="Impakto Artigos para Festas" /></a>
-          <nav aria-label="Navegação da página de lojas"><a href="/">← Voltar para o início</a><a className="stores-whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Falar no WhatsApp</a><ThemeToggle /></nav>
+          <Link className="brand" href="/" aria-label="Voltar para a página inicial"><img className="brand-logo" src="/impakto-logo.png" alt="Impakto Artigos para Festas" width={1056} height={321} /></Link>
+          <nav aria-label="Navegação da página de lojas"><Link href="/">← Voltar para o início</Link><a className="stores-whatsapp" href={whatsapp} target="_blank" rel="noreferrer">Falar no WhatsApp</a><ThemeToggle /></nav>
         </div>
       </header>
 
@@ -35,8 +49,8 @@ export default function StoresPage() {
         </section>
       </main>
 
-      <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" /><p>Precisa de ajuda para escolher uma loja?</p><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" /></a>
+      <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" width={1056} height={321} loading="lazy" decoding="async" /><p>Precisa de ajuda para escolher uma loja?</p><ManageCookiesLink /><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" width={200} height={200} decoding="async" /></a>
     </>
   );
 }

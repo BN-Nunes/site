@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { departments, getDepartment } from "../departments";
 import { AddToCartButton } from "../AddToCartButton";
 import { CartNavLink } from "../../CartLinks";
 import { ThemeToggle } from "../../ThemeToggle";
 import { HomeReturnPopup } from "../HomeReturnPopup";
+import { ManageCookiesLink } from "../../ManageCookiesLink";
+import { canonicalUrl } from "../../lib/site-config";
+import { siteContacts } from "../../lib/site-contacts";
+import { breadcrumbJsonLd, productJsonLd } from "../../lib/structured-data";
 
 type DepartmentPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-const whatsapp = "https://api.whatsapp.com/send?phone=5511940591588";
+const whatsapp = siteContacts.whatsapp.baseUrl;
 
 export function generateStaticParams() {
   return departments.map((department) => ({ slug: department.slug }));
@@ -23,6 +28,7 @@ export async function generateMetadata({ params }: DepartmentPageProps): Promise
   return {
     title: `${department.name} | Impakto Festas`,
     description: department.description,
+    alternates: { canonical: canonicalUrl(`/departamentos/${department.slug}`) },
   };
 }
 
@@ -33,13 +39,21 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(department)) }} />
+      {department.products.map((product) => (
+        <script
+          key={product.id}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, department)) }}
+        />
+      ))}
       <a className="skip-link" href="#produtos">Pular para os produtos</a>
       <div className="utility-bar"><span>Entrega para todo o Brasil</span><i aria-hidden="true" /><span>5% OFF na primeira compra</span><i aria-hidden="true" /><span>4x sem juros</span></div>
 
       <header className="department-header">
         <div className="container department-header-inner">
-          <a className="brand" href="/" aria-label="Voltar para a página inicial"><img className="brand-logo" src="/impakto-logo.png" alt="Impakto Artigos para Festas" /></a>
-          <nav aria-label="Navegação do departamento"><a href="/#categorias">← Todos os departamentos</a><a href="/lojas">Nossas lojas</a><CartNavLink /><ThemeToggle /></nav>
+          <Link className="brand" href="/" aria-label="Voltar para a página inicial"><img className="brand-logo" src="/impakto-logo.png" alt="Impakto Artigos para Festas" width={1056} height={321} /></Link>
+          <nav aria-label="Navegação do departamento"><Link href="/#categorias">← Todos os departamentos</Link><Link href="/lojas">Nossas lojas</Link><CartNavLink /><ThemeToggle /></nav>
         </div>
       </header>
 
@@ -47,7 +61,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
         <section className={`department-hero ${department.className}`}>
           <div className="container department-hero-grid">
             <div className="department-hero-copy">
-              <div className="department-breadcrumb"><a href="/">Início</a><span>/</span><a href="/#categorias">Departamentos</a><span>/</span><strong>{department.name}</strong></div>
+              <div className="department-breadcrumb"><Link href="/">Início</Link><span>/</span><Link href="/#categorias">Departamentos</Link><span>/</span><strong>{department.name}</strong></div>
               <span className="department-label">Departamento</span>
               <h1>{department.name}</h1>
               <p>{department.description}</p>
@@ -116,7 +130,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
               <div className="products-grid">
                 {department.products.map((product) => (
                   <article className="product-card" key={product.id}>
-                    <div className="product-image"><img src={product.image} alt={product.name} /></div>
+                    <div className="product-image"><img src={product.image} alt={product.name} width={600} height={600} loading="lazy" decoding="async" /></div>
                     <div className="product-card-copy"><span>{product.available ? "Disponível" : "Indisponível"}</span><h2>{product.name}</h2><p>{product.description}</p>{product.price && <strong>{product.price}</strong>}<AddToCartButton product={product} department={department.name} /></div>
                   </article>
                 ))}
@@ -137,9 +151,9 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
         </section>
       </main>
 
-      <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" /><p>Quer confirmar a disponibilidade de um produto?</p><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
+      <footer className="stores-footer"><div className="container"><img src="/impakto-logo.png" alt="" width={1056} height={321} loading="lazy" decoding="async" /><p>Quer confirmar a disponibilidade de um produto?</p><ManageCookiesLink /><a href={whatsapp} target="_blank" rel="noreferrer">Fale com a nossa equipe →</a></div></footer>
       <HomeReturnPopup />
-      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" /></a>
+      <a className="whatsapp-float" href={whatsapp} target="_blank" rel="noreferrer" aria-label="Falar com a Impakto Festas pelo WhatsApp"><img src="/whatsapp-logo.png" alt="" width={200} height={200} decoding="async" /></a>
     </>
   );
 }
