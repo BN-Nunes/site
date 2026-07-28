@@ -1,44 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const NOTICE_KEY = "impakto-cookie-notice-v1";
+import Link from "next/link";
+import { getStoredConsent, onOpenPreferencesRequest, setConsent } from "./lib/cookie-consent";
 
 export function CookieNotice() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      setVisible(window.localStorage.getItem(NOTICE_KEY) !== "acknowledged");
-    } catch {
-      setVisible(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única do localStorage (indisponível no SSR) para decidir se o aviso aparece, sem causar mismatch de hidratação.
+    setVisible(getStoredConsent() === null);
+    return onOpenPreferencesRequest(() => setVisible(true));
   }, []);
 
-  function acknowledge() {
-    try {
-      window.localStorage.setItem(NOTICE_KEY, "acknowledged");
-    } finally {
-      setVisible(false);
-    }
+  function choose(consent: "necessary" | "functional") {
+    setConsent(consent);
+    setVisible(false);
   }
 
   if (!visible) return null;
 
   return (
-    <aside className="cookie-notice" role="region" aria-label="Aviso sobre cookies e armazenamento local">
+    <aside className="cookie-notice" role="region" aria-label="Preferências de cookies e armazenamento local">
       <div className="cookie-notice-icon" aria-hidden="true">🍪</div>
       <div className="cookie-notice-copy">
         <strong>Privacidade e cookies</strong>
         <p>
-          Usamos apenas recursos necessários e de funcionalidade para manter sua sessão,
-          seu carrinho de orçamento e suas preferências. O Google Maps só é carregado
-          quando você escolhe abrir o mapa.
+          Usamos cookies necessários para manter sua sessão. Com sua permissão, também
+          lembramos seu carrinho de orçamento e sua preferência de tema entre visitas.
+          O Google Maps só é carregado quando você escolhe abrir o mapa.
         </p>
       </div>
       <div className="cookie-notice-actions">
-        <a href="/politica-de-cookies">Ver política</a>
-        <button type="button" onClick={acknowledge}>Entendi</button>
+        <Link href="/politica-de-cookies">Ver política</Link>
+        <button type="button" className="cookie-notice-secondary" onClick={() => choose("necessary")}>Somente necessários</button>
+        <button type="button" onClick={() => choose("functional")}>Aceitar funcionalidades</button>
       </div>
     </aside>
   );

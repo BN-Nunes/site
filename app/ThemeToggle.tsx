@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isFunctionalAllowed } from "./lib/cookie-consent";
 
 type Theme = "light" | "dark";
 
@@ -9,13 +10,14 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza com o atributo definido pelo script de tema pré-hidratação; ler no render causaria mismatch de hidratação.
     setTheme(current);
   }, []);
 
   function toggleTheme() {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = nextTheme;
-    window.localStorage.setItem("impakto-theme", nextTheme);
+    if (isFunctionalAllowed()) window.localStorage.setItem("impakto-theme", nextTheme);
     setTheme(nextTheme);
   }
 

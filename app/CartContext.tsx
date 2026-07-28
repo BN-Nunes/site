@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Product } from "./departamentos/departments";
+import { isFunctionalAllowed } from "./lib/cookie-consent";
+import { clampQuantity, MAX_QUANTITY } from "./lib/cart-quantity";
 
 export type CartItem = {
   id: string;
@@ -41,7 +43,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed: unknown = JSON.parse(stored);
-        if (Array.isArray(parsed)) setItems(parsed.filter(isCartItem).map((item) => ({ ...item, quantity: Math.max(1, Math.min(99, Math.floor(item.quantity))) })));
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- leitura única do localStorage (indisponível no SSR) para sincronizar o carrinho sem causar mismatch de hidratação.
+        if (Array.isArray(parsed)) setItems(parsed.filter(isCartItem).map((item) => ({ ...item, quantity: clampQuantity(item.quantity) })));
       }
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
@@ -51,7 +54,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (!hydrated) return;
+    if (isFunctionalAllowed()) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    else window.localStorage.removeItem(STORAGE_KEY);
   }, [hydrated, items]);
 
   const value = useMemo<CartContextValue>(() => ({
@@ -60,13 +65,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     addItem(product, department) {
       setItems((current) => {
         const existing = current.find((item) => item.id === product.id);
-        if (existing) return current.map((item) => item.id === product.id ? { ...item, quantity: Math.min(99, item.quantity + 1) } : item);
+        if (existing) return current.map((item) => item.id === product.id ? { ...item, quantity: Math.min(MAX_QUANTITY, item.quantity + 1) } : item);
         return [...current, { id: product.id, name: product.name, description: product.description, department, image: product.image, price: product.price, sku: product.sku, quantity: 1 }];
       });
     },
     removeItem(id) { setItems((current) => current.filter((item) => item.id !== id)); },
     updateQuantity(id, quantity) {
-      const safeQuantity = Math.max(1, Math.min(99, Math.floor(quantity)));
+      const safeQuantity = clampQuantity(quantity);
       setItems((current) => current.map((item) => item.id === id ? { ...item, quantity: safeQuantity } : item));
     },
     clearCart() { setItems([]); },
