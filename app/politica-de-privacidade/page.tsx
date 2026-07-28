@@ -63,6 +63,7 @@ export default function PrivacyPolicyPage() {
               <p><b>Carrinho de orçamento:</b> os produtos que você seleciona ficam guardados no seu navegador (e, quando você está autenticado, também podem ficar associados à sua conta) até o envio do orçamento pelo WhatsApp.</p>
               <p><b>Interações com WhatsApp:</b> ao clicar em &quot;Falar pelo WhatsApp&quot; ou enviar um orçamento, você é direcionado ao aplicativo WhatsApp/Meta com uma mensagem pré-preenchida contendo os itens escolhidos. Essa conversa passa a ocorrer diretamente entre você e a Impakto Festas dentro do WhatsApp, sob a política de privacidade da Meta.</p>
               <p><b>Cadastro para novidades por e-mail:</b> caso o site ofereça um formulário de inscrição para novidades, o e-mail informado só é utilizado com o seu consentimento explícito e pode ser removido a qualquer momento.</p>
+              <p><b>Localização geográfica:</b> na página &quot;Nossas lojas&quot;, você pode optar por compartilhar sua localização para descobrir a filial mais próxima. Essa permissão é pedida pelo próprio navegador, é usada apenas naquele momento para ordenar a lista de filiais por distância, e não é enviada aos nossos servidores nem armazenada — fica apenas na memória da página enquanto você navega.</p>
               <p><b>Dados técnicos e logs de hospedagem:</b> nossos provedores de hospedagem e infraestrutura (Vercel e, em ambientes alternativos, Cloudflare) processam automaticamente dados técnicos de acesso, como endereço IP, tipo de navegador e páginas acessadas, para operar e proteger o site.</p>
 
               <h2>3. Para que usamos os seus dados</h2>
@@ -117,6 +118,7 @@ export default function PrivacyPolicyPage() {
               <ul>
                 <li>Não vendemos seus dados a terceiros.</li>
                 <li>Orçamentos são enviados por você via WhatsApp.</li>
+                <li>Localização é opcional, usada só para achar a loja mais próxima, e nunca sai do seu navegador.</li>
                 <li>Você pode pedir acesso, correção ou exclusão a qualquer momento.</li>
                 <li>Mercado Pago fica inativo até um checkout ser lançado.</li>
               </ul>

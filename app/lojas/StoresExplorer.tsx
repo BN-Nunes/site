@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { storeAddress, stores } from "./stores";
+import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
 
 const cities = Array.from(new Set(stores.map((store) => store.city))).sort((a, b) => a.localeCompare(b, "pt-BR"));
 
@@ -9,22 +10,52 @@ function normalize(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
+type LocationState = "idle" | "loading" | "granted" | "denied" | "unsupported" | "error";
+
 export function StoresExplorer() {
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("Todas as cidades");
+  const [location, setLocation] = useState<Coordinates | null>(null);
+  const [locationState, setLocationState] = useState<LocationState>("idle");
 
   const filteredStores = useMemo(() => {
     const term = normalize(query);
-    return stores.filter((store) => {
+    const matches = stores.filter((store) => {
       const matchesCity = city === "Todas as cidades" || store.city === city;
       const searchable = normalize(`${store.name} ${store.city} ${store.street} ${store.cep} ${store.cnpj}`);
       return matchesCity && (!term || searchable.includes(term));
     });
-  }, [query, city]);
+    return location
+      ? sortByDistance(matches, location)
+      : matches.map((store) => ({ ...store, distanceKm: undefined as number | undefined }));
+  }, [query, city, location]);
 
   function clearFilters() {
     setQuery("");
     setCity("Todas as cidades");
+  }
+
+  function requestLocation() {
+    if (!("geolocation" in navigator)) {
+      setLocationState("unsupported");
+      return;
+    }
+    setLocationState("loading");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationState("granted");
+      },
+      (error) => {
+        setLocationState(error.code === error.PERMISSION_DENIED ? "denied" : "error");
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 },
+    );
+  }
+
+  function clearLocation() {
+    setLocation(null);
+    setLocationState("idle");
   }
 
   return (
@@ -43,6 +74,27 @@ export function StoresExplorer() {
         </label>
       </div>
 
+      <div className="stores-location">
+        {location ? (
+          <button type="button" className="stores-location-button is-active" onClick={clearLocation}>
+            <span aria-hidden="true">⌖</span> Ordenado pela loja mais próxima <span aria-hidden="true">✕</span>
+          </button>
+        ) : (
+          <button type="button" className="stores-location-button" onClick={requestLocation} disabled={locationState === "loading"}>
+            <span aria-hidden="true">⌖</span> {locationState === "loading" ? "Localizando…" : "Usar minha localização"}
+          </button>
+        )}
+        {locationState === "denied" && (
+          <span className="stores-location-feedback" role="status">Permissão de localização negada. Ative nas configurações do navegador para ver a filial mais próxima de você.</span>
+        )}
+        {locationState === "unsupported" && (
+          <span className="stores-location-feedback" role="status">Seu navegador não oferece suporte a localização automática.</span>
+        )}
+        {locationState === "error" && (
+          <span className="stores-location-feedback" role="status">Não foi possível obter sua localização agora. Tente novamente.</span>
+        )}
+      </div>
+
       <div className="stores-result-heading">
         <div><strong>{filteredStores.length}</strong><span>{filteredStores.length === 1 ? "filial encontrada" : "filiais encontradas"}</span></div>
         {(query || city !== "Todas as cidades") && <button type="button" onClick={clearFilters}>Limpar filtros</button>}
@@ -53,12 +105,21 @@ export function StoresExplorer() {
           {filteredStores.map((store, index) => {
             const address = storeAddress(store);
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Impakto Festas ${address}`)}`;
+            const distanceKm = store.distanceKm;
             return (
               <article className="store-card" key={store.cnpj}>
-                <div className="store-card-top"><span className="store-number">{String(index + 1).padStart(2, "0")}</span><span className="store-status"><i /> Unidade ativa</span></div>
+                <div className="store-card-top">
+                  <span className="store-number">{String(index + 1).padStart(2, "0")}</span>
+                  {index === 0 && distanceKm !== undefined ? (
+                    <span className="store-status store-status-nearest"><i /> Mais próxima de você</span>
+                  ) : (
+                    <span className="store-status"><i /> Unidade ativa</span>
+                  )}
+                </div>
                 <h2>Impakto {store.name}</h2>
                 <address><span aria-hidden="true">⌖</span><span>{store.street}, {store.number}<br />{store.city} — {store.state}<br />CEP {store.cep}</span></address>
                 <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
+                {distanceKm !== undefined && <p className="store-distance">A {formatDistanceKm(distanceKm)} de você</p>}
                 <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <span aria-hidden="true">↗</span></a>
               </article>
             );

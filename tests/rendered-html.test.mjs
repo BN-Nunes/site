@@ -4,7 +4,9 @@ import test from "node:test";
 import { resolveSearch } from "../app/lib/search.ts";
 import { buildQuoteMessage } from "../app/lib/quote-message.ts";
 import { clampQuantity } from "../app/lib/cart-quantity.ts";
+import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
 import { departments } from "../app/departamentos/departments.ts";
+import { stores } from "../app/lojas/stores.ts";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -149,6 +151,34 @@ test("cookie consent controls functional persistence", async () => {
   setConsent("necessary");
   assert.equal(store.has("impakto-theme"), false);
   assert.equal(store.has("impakto-orcamento"), false);
+});
+
+test("haversineDistanceKm returns 0 for the same point and ~111km per degree of latitude", () => {
+  assert.equal(haversineDistanceKm({ lat: -23.55, lng: -46.63 }, { lat: -23.55, lng: -46.63 }), 0);
+  const distance = haversineDistanceKm({ lat: 0, lng: 0 }, { lat: 1, lng: 0 });
+  assert.ok(Math.abs(distance - 111.19) < 1, `expected ~111.19km, got ${distance}`);
+});
+
+test("sortByDistance ranks the store closest to the given coordinates first", () => {
+  const barueri = stores.find((store) => store.name === "Barueri");
+  const sorted = sortByDistance(stores, { lat: barueri.lat, lng: barueri.lng });
+  assert.equal(sorted[0].name, "Barueri");
+  assert.ok(sorted[0].distanceKm < 0.001);
+  assert.ok(sorted[0].distanceKm <= sorted[1].distanceKm);
+});
+
+test("formatDistanceKm shows meters below 1km and km with a comma above it", () => {
+  assert.equal(formatDistanceKm(0.35), "350 m");
+  assert.equal(formatDistanceKm(1.2), "1,2 km");
+  assert.equal(formatDistanceKm(12.04), "12,0 km");
+});
+
+test("all 13 stores have plausible São Paulo-area coordinates", () => {
+  assert.equal(stores.length, 13);
+  for (const store of stores) {
+    assert.ok(store.lat < -22 && store.lat > -25, `${store.name} latitude out of range: ${store.lat}`);
+    assert.ok(store.lng < -45 && store.lng > -48, `${store.name} longitude out of range: ${store.lng}`);
+  }
 });
 
 test("no private key appears in the client bundle", async () => {
