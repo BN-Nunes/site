@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { storeAddress, stores } from "./stores";
 import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
 
@@ -35,7 +35,7 @@ export function StoresExplorer() {
     setCity("Todas as cidades");
   }
 
-  function requestLocation() {
+  const requestLocation = useCallback(() => {
     if (!("geolocation" in navigator)) {
       setLocationState("unsupported");
       return;
@@ -51,7 +51,12 @@ export function StoresExplorer() {
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 },
     );
-  }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- pede a localização assim que a página abre, por decisão de produto; navegadores não repetem o prompt depois de um grant/deny anterior.
+    requestLocation();
+  }, [requestLocation]);
 
   function clearLocation() {
     setLocation(null);
@@ -83,6 +88,9 @@ export function StoresExplorer() {
           <button type="button" className="stores-location-button" onClick={requestLocation} disabled={locationState === "loading"}>
             <span aria-hidden="true">⌖</span> {locationState === "loading" ? "Localizando…" : "Usar minha localização"}
           </button>
+        )}
+        {locationState === "granted" && (
+          <span className="sr-only" role="status">Filiais ordenadas da mais próxima para a mais distante de você.</span>
         )}
         {locationState === "denied" && (
           <span className="stores-location-feedback" role="status">Permissão de localização negada. Ative nas configurações do navegador para ver a filial mais próxima de você.</span>

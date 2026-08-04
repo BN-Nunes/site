@@ -173,6 +173,19 @@ test("formatDistanceKm shows meters below 1km and km with a comma above it", () 
   assert.equal(formatDistanceKm(12.04), "12,0 km");
 });
 
+test("sortByDistance ranks the closest store first within a city-filtered subset too", () => {
+  const guarulhosStores = stores.filter((store) => store.city === "Guarulhos");
+  assert.ok(guarulhosStores.length > 1, "expected more than one Guarulhos store to filter among");
+
+  const guarulhos2 = guarulhosStores.find((store) => store.name === "Guarulhos 2");
+  const sorted = sortByDistance(guarulhosStores, { lat: guarulhos2.lat, lng: guarulhos2.lng });
+
+  // The globally nearest store to this origin may be outside Guarulhos, but within
+  // the filtered subset the nearest must still be Guarulhos 2 itself (distance ~0).
+  assert.equal(sorted[0].name, "Guarulhos 2");
+  assert.ok(sorted[0].distanceKm < 0.001);
+});
+
 test("all 13 stores have plausible São Paulo-area coordinates", () => {
   assert.equal(stores.length, 13);
   for (const store of stores) {
