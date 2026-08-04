@@ -7,6 +7,7 @@ import { CartNavLink } from "../../CartLinks";
 import { ThemeToggle } from "../../ThemeToggle";
 import { HomeReturnPopup } from "../HomeReturnPopup";
 import { ManageCookiesLink } from "../../ManageCookiesLink";
+import { ScrollReveal } from "../../ScrollReveal";
 import { canonicalUrl } from "../../lib/site-config";
 import { siteContacts } from "../../lib/site-contacts";
 import { breadcrumbJsonLd, productJsonLd } from "../../lib/structured-data";
@@ -128,6 +129,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
 
             {department.products.length > 0 ? (
               <div className="products-grid">
+                <ScrollReveal selector=".product-card" />
                 {department.products.map((product) => (
                   <article className="product-card" key={product.id}>
                     <div className="product-image"><img src={product.image} alt={product.name} width={600} height={600} loading="lazy" decoding="async" /></div>

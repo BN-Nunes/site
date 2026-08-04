@@ -5,6 +5,7 @@ import { CookieNotice } from "./CookieNotice";
 import { getSiteUrl } from "./lib/site-config";
 import "./globals.css";
 import "./cookies.css";
+import "animate.css/animate.min.css";
 
 const base = new URL(getSiteUrl());
 const image = new URL("/og.png", base).toString();
@@ -28,5 +29,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR" suppressHydrationWarning><head><Script src="/theme-init.js" strategy="beforeInteractive" /></head><body><CartProvider>{children}<CookieNotice /></CartProvider></body></html>;
+  return <html lang="pt-BR" suppressHydrationWarning><head><Script src="/theme-init.js" strategy="beforeInteractive" /><Script src="/reveal-init.js" strategy="beforeInteractive" /></head><body><CartProvider>{children}<CookieNotice /></CartProvider></body></html>;
 }

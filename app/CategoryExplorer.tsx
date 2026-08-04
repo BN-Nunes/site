@@ -1,8 +1,10 @@
 import { departments } from "./departamentos/departments";
+import { ScrollReveal } from "./ScrollReveal";
 
 export function CategoryExplorer() {
   return (
     <section className="categories section" id="categorias">
+      <ScrollReveal selector=".category-card" />
       <div className="container">
         <div className="section-title">
           <div><span className="kicker">Encontre rapidinho</span><h2>Departamentos em destaque</h2></div>
