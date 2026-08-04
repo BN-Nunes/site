@@ -68,7 +68,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
             </div>
             {department.slug === "festas-tematicas" ? (
               <div className="department-hero-art confetti-showcase" aria-hidden="true">
-                <span className="confetti-popper">{department.icon}</span>
+                <img className="confetti-popper" src={department.icon} alt="" width={112} height={112} loading="lazy" decoding="async" />
                 {Array.from({ length: 12 }, (_, index) => (
                   <i className={`confetti-particle confetti-particle-${index + 1}`} key={index} />
                 ))}
@@ -77,7 +77,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
               <div className="department-hero-art cupcake-showcase" aria-hidden="true">
                 <div className="cupcake-stage">
                   <i className="cupcake-ground-shadow" />
-                  <span className="cupcake-icon">{department.icon}</span>
+                  <img className="cupcake-icon" src={department.icon} alt="" width={112} height={112} loading="lazy" decoding="async" />
                   <span className="cupcake-candle">
                     <i className="cupcake-wick" />
                     <i className="cupcake-flame" />
@@ -87,7 +87,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
             ) : department.slug === "descartaveis" ? (
               <div className="department-hero-art drink-showcase" aria-hidden="true">
                 <div className="drink-stage">
-                  <span className="drink-icon">{department.icon}</span>
+                  <img className="drink-icon" src={department.icon} alt="" width={112} height={112} loading="lazy" decoding="async" />
                   <i className="drink-sip-bubble drink-sip-bubble-1" />
                   <i className="drink-sip-bubble drink-sip-bubble-2" />
                   <i className="drink-sip-bubble drink-sip-bubble-3" />
@@ -96,13 +96,13 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
             ) : department.slug === "decoracao" ? (
               <div className="department-hero-art stars-showcase" aria-hidden="true">
                 <div className="stars-orbit-stage">
-                  <span className="stars-orbit-group">{department.icon}</span>
+                  <img className="stars-orbit-group" src={department.icon} alt="" width={112} height={112} loading="lazy" decoding="async" />
                 </div>
               </div>
             ) : department.slug === "papelaria" ? (
               <div className="department-hero-art gift-showcase" aria-hidden="true">
                 <div className="gift-stage">
-                  <span className="gift-icon">{department.icon}</span>
+                  <img className="gift-icon" src={department.icon} alt="" width={112} height={112} loading="lazy" decoding="async" />
                 </div>
               </div>
             ) : department.slug === "ofertas" ? (
@@ -116,7 +116,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
               </div>
             ) : (
               <div className={`department-hero-art${department.slug === "baloes" ? " single-balloon-showcase" : ""}`} aria-hidden="true">
-                <span>{department.icon}</span>
+                <img src={department.icon} alt="" width={112} height={112} loading="lazy" decoding="async" />
               </div>
             )}
           </div>
@@ -137,7 +137,9 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
               </div>
             ) : (
               <div className="products-empty">
-                <div className="products-empty-icon" aria-hidden="true">{department.icon}</div>
+                <div className="products-empty-icon" aria-hidden="true">
+                {department.slug === "ofertas" ? department.icon : <img src={department.icon} alt="" width={46} height={46} loading="lazy" decoding="async" />}
+              </div>
                 <div><span>Catálogo em preparação</span><h2>Novos produtos serão adicionados em breve.</h2><p>Esta página já está pronta para receber fotos, nomes, descrições, preços e disponibilidade dos produtos.</p></div>
                 <a href={whatsapp} target="_blank" rel="noreferrer">Consultar produtos pelo WhatsApp <span aria-hidden="true">→</span></a>
               </div>

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import { resolveSearch } from "../app/lib/search.ts";
 import { buildQuoteMessage } from "../app/lib/quote-message.ts";
@@ -184,6 +184,17 @@ test("sortByDistance ranks the closest store first within a city-filtered subset
   // the filtered subset the nearest must still be Guarulhos 2 itself (distance ~0).
   assert.equal(sorted[0].name, "Guarulhos 2");
   assert.ok(sorted[0].distanceKm < 0.001);
+});
+
+test("every department icon is a fixed local image, except ofertas' literal percent sign", async () => {
+  for (const department of departments) {
+    if (department.slug === "ofertas") {
+      assert.equal(department.icon, "%");
+      continue;
+    }
+    assert.match(department.icon, /^\/departments\/[\w-]+\.webp$/);
+    await access(new URL(`../public${department.icon}`, import.meta.url));
+  }
 });
 
 test("all 13 stores have plausible São Paulo-area coordinates", () => {

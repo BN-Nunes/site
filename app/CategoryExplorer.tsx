@@ -17,7 +17,13 @@ export function CategoryExplorer() {
               aria-label={`Acessar o departamento ${department.name}`}
               key={department.slug}
             >
-              <span className="category-art" aria-hidden="true"><span className="category-icon">{department.icon}</span></span>
+              <span className="category-art" aria-hidden="true">
+                {department.slug === "ofertas" ? (
+                  <span className="category-icon category-icon-text">{department.icon}</span>
+                ) : (
+                  <img className="category-icon" src={department.icon} alt="" width={72} height={72} loading="lazy" decoding="async" />
+                )}
+              </span>
               <strong>{department.name}</strong>
             </a>
           ))}

@@ -13,6 +13,7 @@ export type Department = {
   name: string;
   shortDescription: string;
   description: string;
+  /** Path to a fixed icon image, so it renders identically on every device instead of the OS's own emoji font — except "ofertas", which keeps a literal "%" styled as text. */
   icon: string;
   className: string;
   productTypes: string[];
@@ -26,7 +27,7 @@ export const departments: Department[] = [
     name: "Balões",
     shortDescription: "Cores, formatos e efeitos para transformar o ambiente.",
     description: "Encontre balões para pequenos detalhes, arranjos especiais e grandes cenários de festa.",
-    icon: "🎈",
+    icon: "/departments/baloes.webp",
     className: "balloons",
     productTypes: ["Balões metalizados", "Balões de látex", "Números e letras"],
     products: [
@@ -39,7 +40,7 @@ export const departments: Department[] = [
     name: "Festas temáticas",
     shortDescription: "Temas e acessórios para comemorações com personalidade.",
     description: "Reúna os elementos certos para criar uma comemoração completa, divertida e inesquecível.",
-    icon: "🎉",
+    icon: "/departments/festas-tematicas.webp",
     className: "themes",
     productTypes: ["Temas infantis", "Datas especiais", "Fantasias e acessórios"],
     products: [
@@ -52,7 +53,7 @@ export const departments: Department[] = [
     name: "Confeitaria",
     shortDescription: "Utensílios e detalhes para bolos e doces especiais.",
     description: "Tudo para preparar, decorar e apresentar bolos, doces e outras delícias da sua festa.",
-    icon: "🧁",
+    icon: "/departments/confeitaria.webp",
     className: "bakery",
     productTypes: ["Formas e assadeiras", "Bicos e espátulas", "Toppers e enfeites"],
     products: [
@@ -65,7 +66,7 @@ export const departments: Department[] = [
     name: "Descartáveis",
     shortDescription: "Praticidade e combinações de cores para servir melhor.",
     description: "Copos, pratos, bandejas e acessórios que unem praticidade e beleza à mesa.",
-    icon: "🥤",
+    icon: "/departments/descartaveis.webp",
     className: "disposables",
     productTypes: ["Copos e taças", "Pratos e bandejas", "Talheres e guardanapos"],
     products: [
@@ -78,7 +79,7 @@ export const departments: Department[] = [
     name: "Decoração",
     shortDescription: "Peças que transformam o ambiente e completam a festa.",
     description: "Crie cenários marcantes com peças decorativas para mesas, paredes e ambientes completos.",
-    icon: "✨",
+    icon: "/departments/decoracao.webp",
     className: "decor",
     productTypes: ["Painéis e cortinas", "Enfeites de mesa", "Luminárias e vasos"],
     products: [
@@ -91,7 +92,7 @@ export const departments: Department[] = [
     name: "Papelaria",
     shortDescription: "Convites, embalagens e detalhes personalizados para celebrar.",
     description: "Complete sua comemoração com convites, lembranças, embalagens e artigos de papelaria para cada ocasião.",
-    icon: "🎁",
+    icon: "/departments/papelaria.webp",
     className: "stationery",
     productTypes: ["Convites e cartões", "Embalagens e lembrancinhas", "Tags e adesivos"],
     products: [
