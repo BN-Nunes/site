@@ -11,6 +11,7 @@ import { ScrollReveal } from "../../ScrollReveal";
 import { canonicalUrl } from "../../lib/site-config";
 import { siteContacts } from "../../lib/site-contacts";
 import { breadcrumbJsonLd, productJsonLd } from "../../lib/structured-data";
+import { getDepartmentsWithLiveProducts } from "../../lib/products-source.server";
 
 type DepartmentPageProps = {
   params: Promise<{ slug: string }>;
@@ -35,7 +36,8 @@ export async function generateMetadata({ params }: DepartmentPageProps): Promise
 
 export default async function DepartmentPage({ params }: DepartmentPageProps) {
   const { slug } = await params;
-  const department = getDepartment(slug);
+  const liveDepartments = await getDepartmentsWithLiveProducts();
+  const department = liveDepartments.find((candidate) => candidate.slug === slug);
   if (!department) notFound();
 
   return (
@@ -132,7 +134,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
                 <ScrollReveal selector=".product-card" />
                 {department.products.map((product) => (
                   <article className="product-card" key={product.id}>
-                    <div className="product-image"><img src={product.image} alt={product.name} width={600} height={600} loading="lazy" decoding="async" /></div>
+                    <div className="product-image">{product.image && <img src={product.image} alt={product.name} width={600} height={600} loading="lazy" decoding="async" />}</div>
                     <div className="product-card-copy"><span>{product.available ? "Disponível" : "Indisponível"}</span><h2>{product.name}</h2><p>{product.description}</p>{product.price && <strong>{product.price}</strong>}<AddToCartButton product={product} department={department.name} /></div>
                   </article>
                 ))}

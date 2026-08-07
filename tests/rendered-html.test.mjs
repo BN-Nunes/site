@@ -5,6 +5,8 @@ import { resolveSearch } from "../app/lib/search.ts";
 import { buildQuoteMessage } from "../app/lib/quote-message.ts";
 import { clampQuantity } from "../app/lib/cart-quantity.ts";
 import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
+import { parseCsv } from "../app/lib/csv.ts";
+import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
 import { departments } from "../app/departamentos/departments.ts";
 import { stores } from "../app/lojas/stores.ts";
 
@@ -203,6 +205,33 @@ test("all 13 stores have plausible São Paulo-area coordinates", () => {
     assert.ok(store.lat < -22 && store.lat > -25, `${store.name} latitude out of range: ${store.lat}`);
     assert.ok(store.lng < -45 && store.lng > -48, `${store.name} longitude out of range: ${store.lng}`);
   }
+});
+
+test("parseCsv handles quoted fields with commas, escaped quotes and a header-only file", () => {
+  const csv = 'departamento,nome,descricao\nBalões,"Kit A","Tem vírgula, aspas ""duplas"" e tudo"\n';
+  assert.deepEqual(parseCsv(csv), [{ departamento: "Balões", nome: "Kit A", descricao: 'Tem vírgula, aspas "duplas" e tudo' }]);
+  assert.deepEqual(parseCsv("departamento,nome\n"), []);
+  assert.deepEqual(parseCsv(""), []);
+});
+
+test("mapCsvRowsToDepartments matches department names loosely, skips bad rows, allows a missing price, and falls back per department", () => {
+  const rows = [
+    { departamento: "balões", nome: "Buquê Extra", preco: "R$ 10", disponivel: "sim" }, // sem acento/maiúscula
+    { departamento: "Departamento Inexistente", nome: "Fantasma", preco: "R$ 1", disponivel: "sim" }, // ignorado
+    { departamento: "Confeitaria", nome: "", preco: "R$ 5", disponivel: "sim" }, // sem nome, ignorado
+    { departamento: "Confeitaria", nome: "Sem preço", preco: "", disponivel: "sim" }, // sem preço, válido
+  ];
+
+  const merged = mapCsvRowsToDepartments(rows, departments);
+  const baloes = merged.find((department) => department.slug === "baloes");
+  const confeitaria = merged.find((department) => department.slug === "confeitaria");
+  const descartaveis = merged.find((department) => department.slug === "descartaveis");
+
+  assert.deepEqual(baloes.products, [{ id: "baloes-buque-extra", sku: undefined, name: "Buquê Extra", description: "", price: "R$ 10", image: "", available: true }]);
+  // Preço vazio não invalida a linha: o card só não mostra o preço.
+  assert.deepEqual(confeitaria.products, [{ id: "confeitaria-sem-preco", sku: undefined, name: "Sem preço", description: "", price: "", image: "", available: true }]);
+  // Descartáveis não apareceu na planilha: mantém o catálogo estático como fallback.
+  assert.deepEqual(descartaveis.products, departments.find((department) => department.slug === "descartaveis").products);
 });
 
 test("no private key appears in the client bundle", async () => {

@@ -56,13 +56,14 @@ export function breadcrumbJsonLd(department: Department) {
  */
 export function productJsonLd(product: Product, department: Department) {
   const base = getSiteUrl();
+  const image = product.image ? (product.image.startsWith("http") ? product.image : `${base}${product.image}`) : undefined;
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
     ...(product.sku ? { sku: product.sku } : {}),
-    image: `${base}${product.image}`,
+    ...(image ? { image } : {}),
     category: department.name,
     brand: { "@type": "Brand", name: siteContacts.tradeName },
   };
