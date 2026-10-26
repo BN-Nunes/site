@@ -43,5 +43,8 @@ next-env.d.ts
 /outputs/
 /work/
 
+# supabase CLI local state (created by `supabase link`)
+/supabase/.temp/
+
 # claude code session data
 /.claude/
