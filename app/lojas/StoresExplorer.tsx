@@ -117,6 +117,11 @@ export function StoresExplorer() {
             const phone = storePhoneLink(store);
             return (
               <article className="store-card" key={store.cnpj}>
+                <div className="store-photo">
+                  {store.photo
+                    ? <img src={store.photo} alt={`Fachada da Impakto Festas ${store.name}`} width={800} height={480} loading="lazy" decoding="async" />
+                    : <span aria-hidden="true">Impakto {store.name}</span>}
+                </div>
                 <div className="store-card-top">
                   <span className="store-number">{String(index + 1).padStart(2, "0")}</span>
                   {index === 0 && distanceKm !== undefined ? (

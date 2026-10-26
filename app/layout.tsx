@@ -6,12 +6,13 @@ import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { WhatsAppFloat } from "./WhatsAppFloat";
 import { getSiteUrl } from "./lib/site-config";
-import "@fontsource-variable/inter";
+import "@fontsource-variable/baloo-2";
+import "@fontsource-variable/nunito";
 import "./globals.css";
 import "./cookies.css";
 
 const base = new URL(getSiteUrl());
-const image = new URL("/og.png", base).toString();
+const image = new URL("/og-festas.png", base).toString();
 
 export const metadata: Metadata = {
   metadataBase: base,
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     siteName: "Impakto Festas",
-    images: [{ url: image, width: 1792, height: 939, alt: "Impakto Festas — tudo para transformar qualquer momento em festa" }],
+    images: [{ url: image, width: 1200, height: 630, alt: "Impakto Festas — Realizando sonhos. Tudo para a sua festa em 13 lojas em São Paulo." }],
   },
   twitter: {
     card: "summary_large_image",
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#082c83",
+  themeColor: "#2b1170",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

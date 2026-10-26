@@ -10,6 +10,11 @@ const whatsapp = siteContacts.whatsapp.baseUrl;
 export function SiteFooter() {
   return (
     <footer className="footer">
+      <div className="festa-stripe" aria-hidden="true" />
+      <div className="container footer-brand">
+        <Link className="footer-brand-logo" href="/" aria-label="Impakto Festas — página inicial"><img src="/impakto-logo.png" alt="" width={1056} height={321} loading="lazy" decoding="async" /></Link>
+        <p><strong>Realizando sonhos</strong> em cada festa, em 13 lojas e pelo WhatsApp.</p>
+      </div>
       <div className="container footer-contact-grid">
         <section className="footer-contact-card" aria-labelledby="footer-sac">
           <div className="footer-contact-title"><Icon name="phone" /><h2 id="footer-sac">SAC</h2></div>

@@ -9,9 +9,18 @@ Produção: https://impakto-festas.vercel.app
 ## Stack
 
 - [vinext](https://github.com/cloudflare/vinext) (App Router do Next.js sobre Vite) + React 19
-- CSS próprio em `app/globals.css` e `app/cookies.css` (sem framework); fonte Inter self-hosted via `@fontsource-variable/inter`
+- CSS próprio em `app/globals.css` e `app/cookies.css` (sem framework)
 - Supabase para login, perfil, endereços e histórico de orçamentos (`app/conta/`)
 - Hospedagem na Vercel (`npm run build:vercel`); o build padrão (`npm run build`) gera um Worker da Cloudflare, usado pelos testes
+
+## Identidade visual
+
+Tudo vem do logo da Impakto Festas e da fachada das lojas ("Realizando sonhos"):
+
+- **Cores** (tokens `--c-*` em `app/globals.css`): amarelo `#FCCC0C`, magenta `#CC1884`, verde `#00843C`, roxo `#3C1890`, vermelho `#F01E2C`. O magenta é a cor de ação (botões); o roxo escuro `--brand-deep` é a base de barras e rodapé.
+- **Tipografia**: Baloo 2 (títulos, arredondada como as letras-balão do logo) e Nunito (texto), self-hosted via `@fontsource-variable`.
+- **Grafismo**: as "pílulas" diagonais com anéis da identidade, em `public/brand/pills.svg` e `public/brand/pills-stripe.svg`.
+- **Fotos**: fachadas e mesas temáticas de `impaktofestas.com.br`, otimizadas em `public/fotos/`.
 
 ## Rodando localmente
 

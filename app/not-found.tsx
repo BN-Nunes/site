@@ -17,7 +17,7 @@ export default function NotFound() {
           <h1 id="not-found-title">Página não encontrada</h1>
           <p>O endereço que você tentou acessar não existe ou foi movido. Use a busca acima, explore nossos departamentos ou encontre uma loja perto de você.</p>
           <div className="hero-actions not-found-actions">
-            <Link className="button button-red" href="/#categorias">Ver departamentos</Link>
+            <Link className="button button-cta" href="/#categorias">Ver departamentos</Link>
             <Link className="text-link" href="/lojas">Nossas lojas</Link>
             <a className="text-link" href={siteContacts.whatsapp.baseUrl} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a>
           </div>

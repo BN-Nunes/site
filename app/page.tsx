@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandWord } from "./BrandWord";
 import { CategoryExplorer } from "./CategoryExplorer";
 import { Icon, type IconName } from "./Icon";
 import { JsonLd } from "./JsonLd";
+import { stores } from "./lojas/stores";
 import { canonicalUrl } from "./lib/site-config";
 import { siteContacts } from "./lib/site-contacts";
 import { organizationJsonLd } from "./lib/structured-data";
@@ -18,11 +20,26 @@ const benefits: Array<{ icon: IconName; title: string; text: string }> = [
   { icon: "lock", title: "Compra segura", text: "Seus dados protegidos" },
 ];
 
+const themes = [
+  { label: "Meninos", text: "Temas infantis", image: "/fotos/temas/meninos.webp", href: "/departamentos/festas-tematicas" },
+  { label: "Meninas", text: "Temas infantis", image: "/fotos/temas/meninas.webp", href: "/departamentos/festas-tematicas" },
+  { label: "Doces", text: "Para a mesa da festa", image: "/fotos/temas/doces.webp", href: "/departamentos/confeitaria" },
+  { label: "Confeitaria", text: "Bolos e cupcakes", image: "/fotos/temas/confeitaria.webp", href: "/departamentos/confeitaria" },
+];
+
 const steps = [
   { title: "Escolha os produtos", text: "Navegue pelos departamentos e adicione ao carrinho de orçamento o que precisar." },
   { title: "Selecione uma filial", text: "Diga qual das nossas 13 lojas deve atender você." },
   { title: "Receba pelo WhatsApp", text: "A filial confirma preços, estoque e condições direto com você." },
 ];
+
+const storePhotos = [
+  { src: "/fotos/lojas/tatuape.webp", name: "Tatuapé" },
+  { src: "/fotos/lojas/alphaville.webp", name: "Alphaville" },
+  { src: "/fotos/lojas/santo-andre.webp", name: "Santo André" },
+];
+
+const storeCities = Array.from(new Set(stores.map((store) => store.city))).sort((a, b) => a.localeCompare(b, "pt-BR"));
 
 const whatsapp = siteContacts.whatsapp.baseUrl;
 
@@ -34,19 +51,20 @@ export default function Home() {
       <section className="hero">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <span className="eyebrow">Sua festa começa aqui</span>
-            <h1>Tudo para transformar qualquer momento em <strong>festa.</strong></h1>
-            <p>Encontre balões, temas, confeitaria, descartáveis e decoração em um só lugar — com variedade, preço justo e entrega para todo o Brasil.</p>
+            <span className="eyebrow">Realizando sonhos</span>
+            <h1>A festa começa na <BrandWord />.</h1>
+            <p>Balões, temas, confeitaria, descartáveis e decoração em 13 lojas em São Paulo — e orçamento rápido pelo WhatsApp.</p>
             <div className="hero-actions">
-              <a className="button button-red" href="#categorias">Explorar categorias <Icon name="arrowRight" size={18} /></a>
-              <a className="text-link" href={whatsapp} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a>
+              <a className="button button-cta" href="#categorias">Explorar departamentos <Icon name="arrowRight" size={18} /></a>
+              <Link className="text-link" href="/lojas">Encontrar uma loja</Link>
             </div>
           </div>
 
-          <div className="hero-visual" aria-label="Seleção de artigos para festa com balões, decoração, descartáveis e bolo" role="img">
-            <img src="/hero-party-professional.jpg" alt="" width={1536} height={1024} fetchPriority="high" decoding="async" />
-            <div className="hero-campaign"><span>IMPAKTO FESTAS</span><strong>Sua festa completa<br />em um só clique!</strong></div>
-            <div className="hero-offer"><strong>5% OFF</strong><span>na primeira compra</span></div>
+          <div className="hero-collage" role="img" aria-label="Mesas de festa montadas com produtos Impakto: tema infantil, doces e confeitaria">
+            <img className="hero-photo hero-photo-main" src="/fotos/temas/meninas.webp" alt="" width={640} height={522} fetchPriority="high" decoding="async" />
+            <img className="hero-photo hero-photo-top" src="/fotos/temas/doces.webp" alt="" width={640} height={522} decoding="async" />
+            <img className="hero-photo hero-photo-bottom" src="/fotos/temas/confeitaria.webp" alt="" width={640} height={522} decoding="async" />
+            <span className="hero-sticker" aria-hidden="true"><strong>5% OFF</strong>na 1ª compra</span>
           </div>
         </div>
       </section>
@@ -63,6 +81,22 @@ export default function Home() {
           ))}
         </div>
         <p className="benefit-disclaimer container">Desconto e parcelamento sujeitos a confirmação pela filial no atendimento. Este site não processa pagamentos.</p>
+      </section>
+
+      <section className="themes-section section" aria-labelledby="temas-title">
+        <div className="container">
+          <div className="section-title"><div><span className="kicker">Inspiração</span><h2 id="temas-title">Festas que a gente monta todo dia</h2></div></div>
+          <ul className="theme-grid">
+            {themes.map((theme) => (
+              <li key={theme.label}>
+                <Link className="theme-card" href={theme.href}>
+                  <img src={theme.image} alt="" width={640} height={522} loading="lazy" decoding="async" />
+                  <span><strong>{theme.label}</strong><small>{theme.text}</small></span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section className="how-it-works section" aria-labelledby="how-it-works-title">
@@ -102,11 +136,17 @@ export default function Home() {
 
       <section className="store-locator-section section" aria-labelledby="store-locator-title">
         <div className="container store-locator-card">
-          <div className="store-locator-icon store-locator-identity" aria-hidden="true">
-            <img src="/impakto-identity-360.jpg" alt="" width={360} height={360} loading="lazy" decoding="async" />
+          <div className="store-locator-copy">
+            <span className="kicker">Visite a Impakto</span>
+            <h2 id="store-locator-title">13 lojas cheias de ideias para a sua festa.</h2>
+            <p>Em {storeCities.slice(0, -1).join(", ")} e {storeCities.at(-1)}. Veja a rota, chame no WhatsApp ou ligue direto para a loja.</p>
+            <Link className="button store-locator-button" href="/lojas">Encontre a loja mais próxima <Icon name="arrowRight" size={18} /></Link>
           </div>
-          <div><span className="kicker">Visite a Impakto</span><h2 id="store-locator-title">Uma loja cheia de ideias para sua próxima festa.</h2><p>Consulte endereços, cidades e rotas de todas as nossas 13 filiais ativas.</p></div>
-          <Link className="button store-locator-button" href="/lojas">Encontre a loja mais próxima <Icon name="arrowRight" size={18} /></Link>
+          <ul className="store-locator-photos" aria-label="Algumas das nossas lojas">
+            {storePhotos.map((photo) => (
+              <li key={photo.name}><img src={photo.src} alt={`Fachada da Impakto Festas ${photo.name}`} width={800} height={480} loading="lazy" decoding="async" /><span>{photo.name}</span></li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -114,7 +154,7 @@ export default function Home() {
         <div className="container newsletter-card">
           <div><span className="kicker">Novidades em primeira mão</span><h2>Acompanhe nossas novidades</h2><p>Siga a Impakto Festas no Instagram ou fale com a gente pelo WhatsApp para receber dicas e promoções em primeira mão.</p></div>
           <div className="hero-actions">
-            <a className="button button-red" href={siteContacts.instagram.url} target="_blank" rel="noreferrer">Seguir no Instagram <Icon name="arrowRight" size={18} /></a>
+            <a className="button button-cta" href={siteContacts.instagram.url} target="_blank" rel="noreferrer">Seguir no Instagram <Icon name="arrowRight" size={18} /></a>
             <a className="text-link" href={whatsapp} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a>
           </div>
         </div>

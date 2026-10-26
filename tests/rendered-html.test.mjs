@@ -39,7 +39,7 @@ test("homepage renders the correct title and H1", async () => {
   const { status, html } = await render("/");
   assert.equal(status, 200);
   assert.match(html, /<title>Impakto Festas \| Tudo para sua comemoração<\/title>/);
-  assert.match(html, /<h1>Tudo para transformar qualquer momento em <strong>festa\.<\/strong><\/h1>/);
+  assert.match(html, /<h1>A festa começa na <span class="brand-word"><span class="sr-only">Impakto<\/span>/);
 });
 
 test("homepage links to the cookie policy", async () => {
