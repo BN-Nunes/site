@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
-import { resolveSearch } from "../app/lib/search.ts";
+import { searchCatalog } from "../app/lib/search.ts";
 import { buildQuoteMessage } from "../app/lib/quote-message.ts";
 import { clampQuantity } from "../app/lib/cart-quantity.ts";
+import { serializeJsonLd } from "../app/lib/json-ld.ts";
 import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
 import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
@@ -60,6 +61,8 @@ test("main routes return 200", async () => {
     "/politica-de-cookies",
     "/politica-de-privacidade",
     "/departamentos/festas-tematicas",
+    "/busca",
+    "/busca?q=copos",
   ];
 
   for (const route of routes) {
@@ -73,23 +76,51 @@ test("an unknown department returns 404", async () => {
   assert.equal(status, 404);
 });
 
-test('search for "copos" points to the disposables department', () => {
-  const result = resolveSearch("copos", departments);
-  assert.deepEqual(result, { type: "department", slug: "descartaveis" });
+test("every page shares the same header (search, cart, nav) and footer", async () => {
+  for (const route of ["/", "/lojas", "/carrinho", "/departamentos/baloes", "/quem-somos"]) {
+    const { html } = await render(route);
+    assert.match(html, /<form class="search" role="search" action="\/busca"/, `${route} should have the search form`);
+    assert.match(html, /href="\/carrinho"/, `${route} should link to the cart`);
+    assert.match(html, /href="\/departamentos\/papelaria"/, `${route} should list every department in the nav`);
+    assert.match(html, /href="\/politica-de-privacidade"/, `${route} should have the shared footer`);
+  }
 });
 
-test('search for "balões" points to the balloons department', () => {
-  const result = resolveSearch("balões", departments);
-  assert.deepEqual(result, { type: "department", slug: "baloes" });
+test("the search page lists matching products from the catalog", async () => {
+  const { status, html } = await render("/busca?q=copos");
+  assert.equal(status, 200);
+  assert.match(html, /Kit Descartáveis Coloridos/);
+  assert.match(html, /noindex/);
 });
 
-test("search for a store-related term points to the stores page", () => {
-  const result = resolveSearch("endereço da loja", departments);
-  assert.deepEqual(result, { type: "stores" });
+test('searching for "copos" finds the disposables department and its products', () => {
+  const result = searchCatalog("copos", departments);
+  assert.equal(result.departments[0].slug, "descartaveis");
+  assert.ok(result.products.length > 0);
+  assert.ok(result.products.every(({ department }) => department.slug === "descartaveis"));
+  assert.equal(result.wantsStores, false);
 });
 
-test("empty search returns the empty result", () => {
-  assert.deepEqual(resolveSearch("   ", departments), { type: "empty" });
+test('searching for "balão" (singular, accented) still finds balloons', () => {
+  const result = searchCatalog("balão", departments);
+  assert.equal(result.departments[0].slug, "baloes");
+  assert.equal(result.products[0].department.slug, "baloes");
+});
+
+test("a store-related search flags the stores shortcut", () => {
+  assert.equal(searchCatalog("endereço da loja", departments).wantsStores, true);
+});
+
+test("empty or stop-word-only searches return nothing", () => {
+  for (const query of ["   ", "de para com"]) {
+    assert.deepEqual(searchCatalog(query, departments), { wantsStores: false, departments: [], products: [] });
+  }
+});
+
+test("JSON-LD serialization cannot close the script tag", () => {
+  const serialized = serializeJsonLd({ name: '</script><script>alert(1)</script> & co' });
+  assert.doesNotMatch(serialized, /<|>|&/);
+  assert.equal(JSON.parse(serialized).name, '</script><script>alert(1)</script> & co');
 });
 
 test("WhatsApp quote message includes name, quantity, product and SKU", () => {
@@ -102,6 +133,13 @@ test("WhatsApp quote message includes name, quantity, product and SKU", () => {
   assert.match(message, /2x Kit Festa Unicórnio/);
   assert.match(message, /Código: BAL-001/);
   assert.match(message, /10x Copos descartáveis/);
+  assert.match(message, /produtos:\n\n1\. 2x/, "a blank line separates the greeting from the list");
+  assert.doesNotMatch(message, /Observações/);
+});
+
+test("WhatsApp quote message appends trimmed notes when provided", () => {
+  const message = buildQuoteMessage("Maria", [{ name: "Produto", quantity: 1 }], "  Festa dia 12, tema azul  ");
+  assert.match(message, /\n\nObservações: Festa dia 12, tema azul$/);
 });
 
 test("WhatsApp quote message is empty without a customer name or items", () => {
@@ -116,6 +154,7 @@ test("cart quantity is clamped between 1 and 99", () => {
   assert.equal(clampQuantity(99), 99);
   assert.equal(clampQuantity(150), 99);
   assert.equal(clampQuantity(42.9), 42);
+  assert.equal(clampQuantity(Number.NaN), 1);
 });
 
 test("cookie consent controls functional persistence", async () => {

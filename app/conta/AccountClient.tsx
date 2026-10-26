@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
+import { Icon } from "../Icon";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../supabase-client";
 import {
   fetchDefaultAddress,
@@ -145,10 +146,12 @@ export function AccountClient() {
   }, [session, activePanel]);
   const ordersLoading = activePanel === "orders" && orders === null;
 
+  // Prefere o nome salvo em "Meus dados": o metadata do login guarda só o nome informado no cadastro.
   const displayName = useMemo(() => {
+    if (profileName.trim()) return profileName.trim();
     const metadataName = session?.user.user_metadata?.full_name;
     return typeof metadataName === "string" && metadataName.trim() ? metadataName : "Cliente Impakto";
-  }, [session]);
+  }, [profileName, session]);
 
   function switchMode(nextMode: AccountMode) {
     setMode(nextMode);
@@ -337,19 +340,19 @@ export function AccountClient() {
         </div>
         <div className="customer-dashboard-grid">
           <button className={activePanel === "profile" ? "is-active" : ""} type="button" onClick={() => toggleDashboardPanel("profile")} aria-expanded={activePanel === "profile"}>
-            <span aria-hidden="true">♙</span><div><strong>Meus dados</strong><p>Nome, e-mail e telefone da sua conta.</p></div><small>Conta ativa</small>
+            <span><Icon name="user" /></span><div><strong>Meus dados</strong><p>Nome, e-mail e telefone da sua conta.</p></div><small>Conta ativa</small>
           </button>
           <button className={activePanel === "orders" ? "is-active" : ""} type="button" onClick={() => toggleDashboardPanel("orders")} aria-expanded={activePanel === "orders"}>
-            <span aria-hidden="true">▣</span><div><strong>Meus orçamentos</strong><p>Acompanhe os orçamentos enviados pelo WhatsApp.</p></div><small>Histórico</small>
+            <span><Icon name="cart" /></span><div><strong>Meus orçamentos</strong><p>Histórico dos orçamentos enviados pelo carrinho.</p></div><small>Histórico</small>
           </button>
           <button className={activePanel === "address" ? "is-active" : ""} type="button" onClick={() => toggleDashboardPanel("address")} aria-expanded={activePanel === "address"}>
-            <span aria-hidden="true">⌖</span><div><strong>Meus endereços</strong><p>Cadastre seu endereço principal.</p></div><small>Cadastro</small>
+            <span><Icon name="pin" /></span><div><strong>Meus endereços</strong><p>Cadastre seu endereço principal.</p></div><small>Cadastro</small>
           </button>
         </div>
 
         {activePanel === "profile" && (
           <section className="customer-detail-panel" aria-labelledby="profile-panel-title">
-            <div className="customer-panel-heading"><div><span>Informações pessoais</span><h3 id="profile-panel-title">Meus dados</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus dados">×</button></div>
+            <div className="customer-panel-heading"><div><span>Informações pessoais</span><h3 id="profile-panel-title">Meus dados</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus dados"><Icon name="close" size={18} /></button></div>
             {!profileTableReady && <div className="account-feedback error" role="status">A tabela de perfis ainda não foi configurada no Supabase. Aplique a migration em <code>supabase/migrations/20260727_customer_profiles.sql</code> para ativar o salvamento.</div>}
             <form className="customer-form" onSubmit={saveProfile}>
               <label><span>Nome completo</span><input type="text" autoComplete="name" value={profileName} onChange={(event) => setProfileName(event.target.value)} required /></label>
@@ -363,13 +366,13 @@ export function AccountClient() {
 
         {activePanel === "orders" && (
           <section className="customer-detail-panel" aria-labelledby="orders-panel-title">
-            <div className="customer-panel-heading"><div><span>Histórico da conta</span><h3 id="orders-panel-title">Meus orçamentos</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus orçamentos">×</button></div>
+            <div className="customer-panel-heading"><div><span>Histórico da conta</span><h3 id="orders-panel-title">Meus orçamentos</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus orçamentos"><Icon name="close" size={18} /></button></div>
             {!ordersTableReady ? (
               <div className="account-feedback error" role="status">A tabela de orçamentos ainda não foi configurada no Supabase. Aplique a migration em <code>supabase/migrations/20260727_customer_profiles.sql</code> para ativar o histórico.</div>
             ) : ordersLoading ? (
               <div className="account-loading" role="status">Carregando seus orçamentos…</div>
             ) : (orders ?? []).length === 0 ? (
-              <div className="customer-empty-orders"><span aria-hidden="true">▣</span><h4>Nenhum orçamento registrado</h4><p>Quando você enviar um orçamento pelo carrinho estando conectado, ele aparecerá aqui.</p><Link href="/#categorias">Explorar departamentos</Link></div>
+              <div className="customer-empty-orders"><span><Icon name="cart" size={26} /></span><h4>Nenhum orçamento registrado</h4><p>Quando você enviar um orçamento pelo carrinho estando conectado, ele aparecerá aqui.</p><Link href="/#categorias">Explorar departamentos</Link></div>
             ) : (
               <ul className="customer-orders-list">
                 {(orders ?? []).map((order) => (
@@ -385,7 +388,7 @@ export function AccountClient() {
 
         {activePanel === "address" && (
           <section className="customer-detail-panel" aria-labelledby="address-panel-title">
-            <div className="customer-panel-heading"><div><span>Endereço principal</span><h3 id="address-panel-title">Meus endereços</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus endereços">×</button></div>
+            <div className="customer-panel-heading"><div><span>Endereço principal</span><h3 id="address-panel-title">Meus endereços</h3></div><button type="button" onClick={() => setActivePanel(null)} aria-label="Fechar meus endereços"><Icon name="close" size={18} /></button></div>
             {!addressTableReady && <div className="account-feedback error" role="status">A tabela de endereços ainda não foi configurada no Supabase. Aplique a migration em <code>supabase/migrations/20260727_customer_profiles.sql</code> para ativar o salvamento.</div>}
             <form className="customer-form customer-address-form" onSubmit={saveAddress}>
               <label><span>CEP</span><input type="text" inputMode="numeric" autoComplete="postal-code" value={address.postal_code} onChange={(event) => setAddress((current) => ({ ...current, postal_code: event.target.value }))} placeholder="00000-000" required /></label>

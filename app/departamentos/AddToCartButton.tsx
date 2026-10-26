@@ -1,20 +1,22 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { Product } from "./departments";
 import { useCart } from "../CartContext";
+import { Icon } from "../Icon";
 
 const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export function AddToCartButton({ product, department }: { product: Product; department: string }) {
-  const { addItem } = useCart();
-  const [added, setAdded] = useState(false);
+  const { addItem, items } = useCart();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const dialogTitleId = useId();
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const continueButtonRef = useRef<HTMLButtonElement>(null);
+  const quantityInCart = items.find((item) => item.id === product.id)?.quantity ?? 0;
 
   useEffect(() => {
     if (!confirmationOpen) return;
@@ -54,30 +56,33 @@ export function AddToCartButton({ product, department }: { product: Product; dep
 
   function handleAdd() {
     addItem(product, department);
-    setAdded(true);
     setConfirmationOpen(true);
-    window.setTimeout(() => setAdded(false), 1800);
   }
 
   return (
-    <>
-      <button ref={addButtonRef} className={`add-to-quote${added ? " added" : ""}`} type="button" onClick={handleAdd} disabled={!product.available}>{!product.available ? "Indisponível" : added ? "Adicionado ao carrinho ✓" : "Adicionar ao orçamento"}</button>
+    <div className="add-to-quote-wrap">
+      {quantityInCart > 0 && <Link className="in-cart-note" href="/carrinho"><Icon name="check" size={14} /> {quantityInCart} no orçamento</Link>}
+      <button ref={addButtonRef} className="add-to-quote" type="button" onClick={handleAdd} disabled={!product.available}>
+        {!product.available ? "Indisponível" : quantityInCart > 0 ? "Adicionar mais um" : "Adicionar ao orçamento"}
+      </button>
 
-      {confirmationOpen && (
+      {/* Portal no <body>: os cards animam com transform, o que prenderia um overlay position:fixed dentro do card. */}
+      {confirmationOpen && createPortal(
         <div className="cart-confirmation-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setConfirmationOpen(false); }}>
           <section className="cart-confirmation-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={dialogTitleId}>
-            <button className="cart-confirmation-close" type="button" onClick={() => setConfirmationOpen(false)} aria-label="Fechar confirmação">×</button>
-            <span className="cart-confirmation-icon" aria-hidden="true">✓</span>
-            <small>Produto adicionado</small>
+            <button className="cart-confirmation-close" type="button" onClick={() => setConfirmationOpen(false)} aria-label="Fechar confirmação"><Icon name="close" /></button>
+            <span className="cart-confirmation-icon"><Icon name="check" size={28} /></span>
+            <small>Adicionado ao orçamento</small>
             <h2 id={dialogTitleId}>{product.name}</h2>
-            <p>O produto foi adicionado ao seu carrinho de orçamento.</p>
+            <p>{quantityInCart > 1 ? `Agora são ${quantityInCart} unidades no seu carrinho de orçamento.` : "O produto está no seu carrinho de orçamento."} Você pode ajustar as quantidades antes de enviar.</p>
             <div className="cart-confirmation-actions">
-              <Link href="/carrinho">Ir para o carrinho</Link>
-              <button ref={continueButtonRef} type="button" onClick={() => setConfirmationOpen(false)}>Continuar comprando</button>
+              <Link href="/carrinho">Ver carrinho e enviar</Link>
+              <button ref={continueButtonRef} type="button" onClick={() => setConfirmationOpen(false)}>Continuar escolhendo</button>
             </div>
           </section>
-        </div>
+        </div>,
+        document.body,
       )}
-    </>
+    </div>
   );
 }

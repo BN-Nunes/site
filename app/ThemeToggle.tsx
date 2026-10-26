@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { isFunctionalAllowed } from "./lib/cookie-consent";
+import { Icon } from "./Icon";
 
 type Theme = "light" | "dark";
 
@@ -31,7 +32,7 @@ export function ThemeToggle() {
       aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
       title={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
     >
-      <span aria-hidden="true">{theme === null ? "◐" : isDark ? "☀" : "☾"}</span>
+      <Icon name={isDark ? "sun" : "moon"} />
     </button>
   );
 }

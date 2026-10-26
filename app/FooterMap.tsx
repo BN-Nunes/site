@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "./Icon";
 
 const mapEmbedUrl = "https://www.google.com/maps?q=Estrada%20do%20Embu%2C%20320%2C%20Jardim%20Torino%2C%20Cotia%2C%20SP%2C%2006713-100&output=embed";
 const mapLinkUrl = "https://www.google.com/maps/search/?api=1&query=Estrada%20do%20Embu%2C%20320%2C%20Jardim%20Torino%2C%20Cotia%2C%20SP%2C%2006713-100";
@@ -22,7 +23,7 @@ export function FooterMap() {
         />
       ) : (
         <div className="footer-map-placeholder">
-          <span aria-hidden="true">⌖</span>
+          <span><Icon name="pin" size={22} /></span>
           <div><strong>Impakto Cotia</strong><small>Estr. do Embu, 320</small></div>
           <button type="button" onClick={() => setShowMap(true)}>Carregar mapa</button>
         </div>
@@ -31,4 +32,3 @@ export function FooterMap() {
     </section>
   );
 }
-

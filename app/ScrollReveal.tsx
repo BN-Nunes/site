@@ -17,7 +17,7 @@ export function ScrollReveal({ selector }: { selector: string }) {
           const target = entry.target as HTMLElement;
           const index = elements.indexOf(target);
           target.style.animationDelay = `${Math.min(index * STAGGER_STEP_MS, STAGGER_CAP_MS)}ms`;
-          target.classList.add("animate__animated", "animate__fadeInUp");
+          target.classList.add("is-revealed");
           observer.unobserve(target);
         }
       },

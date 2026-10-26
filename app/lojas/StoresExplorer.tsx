@@ -3,12 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { storeAddress, stores } from "./stores";
 import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
+import { normalize } from "../lib/search";
+import { Icon } from "../Icon";
 
 const cities = Array.from(new Set(stores.map((store) => store.city))).sort((a, b) => a.localeCompare(b, "pt-BR"));
-
-function normalize(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
 
 type LocationState = "idle" | "loading" | "granted" | "denied" | "unsupported" | "error";
 
@@ -68,7 +66,7 @@ export function StoresExplorer() {
       <div className="stores-filters" role="search" aria-label="Buscar filiais">
         <label className="store-search-field">
           <span>Buscar uma unidade</span>
-          <div><span aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nome, cidade, endereço ou CEP" /></div>
+          <div><Icon name="search" /><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nome, cidade, endereço ou CEP" /></div>
         </label>
         <label className="store-city-field">
           <span>Filtrar por cidade</span>
@@ -82,11 +80,11 @@ export function StoresExplorer() {
       <div className="stores-location">
         {location ? (
           <button type="button" className="stores-location-button is-active" onClick={clearLocation}>
-            <span aria-hidden="true">⌖</span> Ordenado pela loja mais próxima <span aria-hidden="true">✕</span>
+            <Icon name="locate" size={18} /> Ordenado pela loja mais próxima <Icon name="close" size={16} />
           </button>
         ) : (
           <button type="button" className="stores-location-button" onClick={requestLocation} disabled={locationState === "loading"}>
-            <span aria-hidden="true">⌖</span> {locationState === "loading" ? "Localizando…" : "Usar minha localização"}
+            <Icon name="locate" size={18} /> {locationState === "loading" ? "Localizando…" : "Usar minha localização"}
           </button>
         )}
         {locationState === "granted" && (
@@ -125,16 +123,16 @@ export function StoresExplorer() {
                   )}
                 </div>
                 <h2>Impakto {store.name}</h2>
-                <address><span aria-hidden="true">⌖</span><span>{store.street}, {store.number}<br />{store.city} — {store.state}<br />CEP {store.cep}</span></address>
+                <address><Icon name="pin" size={20} /><span>{store.street}, {store.number}<br />{store.city} — {store.state}<br />CEP {store.cep}</span></address>
                 <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
                 {distanceKm !== undefined && <p className="store-distance">A {formatDistanceKm(distanceKm)} de você</p>}
-                <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <span aria-hidden="true">↗</span></a>
+                <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <Icon name="external" size={16} /></a>
               </article>
             );
           })}
         </div>
       ) : (
-        <div className="stores-empty"><span aria-hidden="true">⌕</span><h2>Nenhuma filial encontrada</h2><p>Tente buscar por outra cidade, endereço ou CEP.</p><button type="button" onClick={clearFilters}>Ver todas as filiais</button></div>
+        <div className="stores-empty"><span aria-hidden="true"><Icon name="search" size={40} /></span><h2>Nenhuma filial encontrada</h2><p>Tente buscar por outra cidade, endereço ou CEP.</p><button type="button" onClick={clearFilters}>Ver todas as filiais</button></div>
       )}
     </>
   );
