@@ -1,8 +1,8 @@
 import type { Store } from "../lojas/stores.ts";
 import { siteContacts } from "./site-contacts.ts";
 
-/** "5511973540454" → "(11) 97354-0454". */
-export function formatWhatsappNumber(e164: string): string {
+/** "5511973540454" → "(11) 97354-0454"; "551146155083" → "(11) 4615-5083". */
+export function formatPhoneNumber(e164: string): string {
   const local = e164.startsWith("55") ? e164.slice(2) : e164;
   const ddd = local.slice(0, 2);
   const number = local.slice(2);
@@ -20,6 +20,12 @@ export function storeWhatsappLink(store: Store): { url: string; direct: boolean;
   return {
     url: `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`,
     direct: Boolean(store.whatsapp),
-    display: formatWhatsappNumber(phone),
+    display: formatPhoneNumber(phone),
   };
+}
+
+/** Link `tel:` do telefone fixo da filial, ou `null` quando a loja não divulga um. */
+export function storePhoneLink(store: Store): { href: string; display: string } | null {
+  if (!store.phone) return null;
+  return { href: `tel:+${store.phone}`, display: formatPhoneNumber(store.phone) };
 }

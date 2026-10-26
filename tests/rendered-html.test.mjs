@@ -10,7 +10,7 @@ import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
 import { departments } from "../app/departamentos/departments.ts";
 import { stores } from "../app/lojas/stores.ts";
-import { formatWhatsappNumber, storeWhatsappLink } from "../app/lib/store-whatsapp.ts";
+import { formatPhoneNumber, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -264,7 +264,14 @@ test("store WhatsApp link names the store and falls back to the central number",
   const withoutNumber = storeWhatsappLink({ ...stores[0], name: "Teste", whatsapp: undefined });
   assert.equal(withoutNumber.direct, false);
   assert.match(withoutNumber.url, /phone=5511940591588&/);
-  assert.equal(formatWhatsappNumber("5511940591588"), "(11) 94059-1588");
+  assert.equal(formatPhoneNumber("5511940591588"), "(11) 94059-1588");
+});
+
+test("store landline phones become tel: links, and stores without one get no call button", () => {
+  assert.deepEqual(storePhoneLink(stores.find((store) => store.name === "Barueri")), { href: "tel:+551146155083", display: "(11) 4615-5083" });
+  // Cotia's landline is commented out on the official page, so it must not be published here.
+  assert.equal(storePhoneLink(stores.find((store) => store.name === "Cotia")), null);
+  for (const store of stores.filter((candidate) => candidate.phone)) assert.match(store.phone, /^5511[2-5]\d{7}$/);
 });
 
 test("parseCsv handles quoted fields with commas, escaped quotes and a header-only file", () => {

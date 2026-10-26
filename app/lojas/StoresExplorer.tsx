@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { storeAddress, stores } from "./stores";
 import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
 import { normalize } from "../lib/search";
-import { storeWhatsappLink } from "../lib/store-whatsapp";
+import { storePhoneLink, storeWhatsappLink } from "../lib/store-contact";
 import { Icon } from "../Icon";
 
 const cities = Array.from(new Set(stores.map((store) => store.city))).sort((a, b) => a.localeCompare(b, "pt-BR"));
@@ -114,6 +114,7 @@ export function StoresExplorer() {
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Impakto Festas ${address}`)}`;
             const distanceKm = store.distanceKm;
             const whatsapp = storeWhatsappLink(store);
+            const phone = storePhoneLink(store);
             return (
               <article className="store-card" key={store.cnpj}>
                 <div className="store-card-top">
@@ -129,9 +130,10 @@ export function StoresExplorer() {
                 <div className="store-meta">
                   <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
                   <p className="store-cnpj"><span>WhatsApp</span>{whatsapp.direct ? whatsapp.display : "Pela central"}</p>
+                  {phone && <p className="store-cnpj"><span>Telefone</span>{phone.display}</p>}
                 </div>
                 {distanceKm !== undefined && <p className="store-distance">A {formatDistanceKm(distanceKm)} de você</p>}
-                <div className="store-actions">
+                <div className={phone ? "store-actions has-phone" : "store-actions"}>
                   <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <Icon name="external" size={16} /></a>
                   <a
                     className="store-whatsapp-button"
@@ -142,6 +144,7 @@ export function StoresExplorer() {
                   >
                     <img src="/whatsapp-logo.png" alt="" width={200} height={200} loading="lazy" decoding="async" /> WhatsApp
                   </a>
+                  {phone && <a className="store-call-button" href={phone.href} aria-label={`Ligar para a Impakto ${store.name}: ${phone.display}`}><Icon name="phone" size={16} /> Ligar</a>}
                 </div>
               </article>
             );
