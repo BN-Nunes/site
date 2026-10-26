@@ -507,3 +507,15 @@ html[data-theme="dark"] .quote-quantity input{border-color:var(--line)}
 @media (max-width:650px){.cart-steps{flex-direction:column;gap:8px}}
 @media (max-width:700px){.department-type-list{flex-direction:row;flex-wrap:wrap}.department-type-list strong{width:100%}}
 html[data-theme="dark"] .nav-offer{color:var(--red)}
+
+/* Store card: CNPJ + WhatsApp info and the two action buttons */
+.store-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 20px;padding-top:14px;border-top:1px solid var(--line)}
+.store-meta .store-cnpj{margin:0;padding:0;border:0}
+.store-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto}
+.store-actions .store-map-button{margin-top:0}
+.store-whatsapp-button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;border-radius:12px;background:#e6f8ef;color:#086b40;font-size:13px;font-weight:900;transition:.2s}
+.store-whatsapp-button img{width:22px;height:22px;flex:0 0 auto;border-radius:50%;object-fit:cover}
+.store-whatsapp-button:hover{background:#119d61;color:#fff;transform:translateY(-2px)}
+html[data-theme="dark"] .store-whatsapp-button{background:rgba(19,155,98,.18);color:var(--green)}
+html[data-theme="dark"] .store-whatsapp-button:hover{background:#0f7a4b;color:#fff}
+@media (max-width:359px){.store-actions{grid-template-columns:1fr}}

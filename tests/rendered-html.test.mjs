@@ -10,6 +10,7 @@ import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
 import { departments } from "../app/departamentos/departments.ts";
 import { stores } from "../app/lojas/stores.ts";
+import { formatWhatsappNumber, storeWhatsappLink } from "../app/lib/store-whatsapp.ts";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -244,6 +245,26 @@ test("all 13 stores have plausible São Paulo-area coordinates", () => {
     assert.ok(store.lat < -22 && store.lat > -25, `${store.name} latitude out of range: ${store.lat}`);
     assert.ok(store.lng < -45 && store.lng > -48, `${store.name} longitude out of range: ${store.lng}`);
   }
+});
+
+test("store WhatsApp numbers are valid São Paulo mobiles and never shared between stores", () => {
+  const numbers = stores.filter((store) => store.whatsapp).map((store) => store.whatsapp);
+  assert.ok(numbers.length >= 12, "expected the stores listed on impaktofestas.com.br to have their own WhatsApp");
+  for (const number of numbers) assert.match(number, /^55119\d{8}$/);
+  assert.equal(new Set(numbers).size, numbers.length);
+});
+
+test("store WhatsApp link names the store and falls back to the central number", () => {
+  const barueri = storeWhatsappLink(stores.find((store) => store.name === "Barueri"));
+  assert.equal(barueri.direct, true);
+  assert.equal(barueri.display, "(11) 97354-0454");
+  assert.match(barueri.url, /^https:\/\/api\.whatsapp\.com\/send\?phone=5511973540454&text=/);
+  assert.match(decodeURIComponent(barueri.url), /loja Impakto Barueri\.$/);
+
+  const withoutNumber = storeWhatsappLink({ ...stores[0], name: "Teste", whatsapp: undefined });
+  assert.equal(withoutNumber.direct, false);
+  assert.match(withoutNumber.url, /phone=5511940591588&/);
+  assert.equal(formatWhatsappNumber("5511940591588"), "(11) 94059-1588");
 });
 
 test("parseCsv handles quoted fields with commas, escaped quotes and a header-only file", () => {

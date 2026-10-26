@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { storeAddress, stores } from "./stores";
 import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
 import { normalize } from "../lib/search";
+import { storeWhatsappLink } from "../lib/store-whatsapp";
 import { Icon } from "../Icon";
 
 const cities = Array.from(new Set(stores.map((store) => store.city))).sort((a, b) => a.localeCompare(b, "pt-BR"));
@@ -112,6 +113,7 @@ export function StoresExplorer() {
             const address = storeAddress(store);
             const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Impakto Festas ${address}`)}`;
             const distanceKm = store.distanceKm;
+            const whatsapp = storeWhatsappLink(store);
             return (
               <article className="store-card" key={store.cnpj}>
                 <div className="store-card-top">
@@ -124,9 +126,23 @@ export function StoresExplorer() {
                 </div>
                 <h2>Impakto {store.name}</h2>
                 <address><Icon name="pin" size={20} /><span>{store.street}, {store.number}<br />{store.city} — {store.state}<br />CEP {store.cep}</span></address>
-                <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
+                <div className="store-meta">
+                  <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
+                  <p className="store-cnpj"><span>WhatsApp</span>{whatsapp.direct ? whatsapp.display : "Pela central"}</p>
+                </div>
                 {distanceKm !== undefined && <p className="store-distance">A {formatDistanceKm(distanceKm)} de você</p>}
-                <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <Icon name="external" size={16} /></a>
+                <div className="store-actions">
+                  <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <Icon name="external" size={16} /></a>
+                  <a
+                    className="store-whatsapp-button"
+                    href={whatsapp.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Falar com a Impakto ${store.name} pelo WhatsApp ${whatsapp.display}${whatsapp.direct ? "" : " (atendimento central)"}`}
+                  >
+                    <img src="/whatsapp-logo.png" alt="" width={200} height={200} loading="lazy" decoding="async" /> WhatsApp
+                  </a>
+                </div>
               </article>
             );
           })}
