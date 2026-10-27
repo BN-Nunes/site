@@ -150,6 +150,18 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="marketplace-section section" aria-labelledby="marketplace-title">
+        <div className="container marketplace-card">
+          <span className="marketplace-icon" aria-hidden="true"><Icon name="truck" size={30} /></span>
+          <div>
+            <span className="kicker">Compre online</span>
+            <h2 id="marketplace-title">Prefere receber em casa?</h2>
+            <p>Compre na loja oficial da Impakto Festas no Mercado Livre, com pagamento e entrega pelo próprio Mercado Livre.</p>
+          </div>
+          <a className="button marketplace-button" href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer">Ir para o Mercado Livre <Icon name="external" size={18} /></a>
+        </div>
+      </section>
+
       <section className="newsletter section" id="newsletter">
         <div className="container newsletter-card">
           <div><span className="kicker">Novidades em primeira mão</span><h2>Acompanhe nossas novidades</h2><p>Siga a Impakto Festas no Instagram ou fale com a gente pelo WhatsApp para receber dicas e promoções em primeira mão.</p></div>

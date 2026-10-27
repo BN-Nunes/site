@@ -54,6 +54,7 @@ export function SiteFooter() {
             <Link href="/conta">Minha conta</Link>
             <Link href="/carrinho">Carrinho de orçamento</Link>
             <a href={whatsapp} target="_blank" rel="noreferrer">Fale pelo WhatsApp</a>
+            <a href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer">Loja no Mercado Livre</a>
           </nav>
         </section>
         <section aria-labelledby="footer-privacy-title">

@@ -20,6 +20,8 @@ export const siteContacts = {
     url: "https://www.instagram.com/impaktofestas/?hl=pt",
     handle: "@impaktofestas",
   },
+  /** Loja oficial no Mercado Livre: é onde o cliente compra online com entrega, já que este site só faz orçamentos. */
+  mercadoLivreUrl: "https://www.mercadolivre.com.br/loja/impakto-festas",
   professionalSiteUrl: "https://www.impakto.com.br/",
   headquarters: {
     street: "Estr. do Embu, 320",

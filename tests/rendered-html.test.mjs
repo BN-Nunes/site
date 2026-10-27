@@ -263,6 +263,16 @@ test("every store photo points to a file in public/fotos/lojas", async () => {
   }
 });
 
+test("every page links to the official Mercado Livre store, and the homepage has a section for it", async () => {
+  const link = /<a href="https:\/\/www\.mercadolivre\.com\.br\/loja\/impakto-festas" target="_blank" rel="noreferrer">/;
+  for (const path of ["/", "/lojas", "/carrinho"]) {
+    const { html } = await render(path);
+    assert.match(html, link, `${path} should link to the Mercado Livre store`);
+  }
+  const { html } = await render("/");
+  assert.match(html, /<h2 id="marketplace-title">/);
+});
+
 test("every photo on the homepage exists in public/fotos", async () => {
   const { html } = await render("/");
   const photos = [...new Set([...html.matchAll(/src="(\/fotos\/[^"]+)"/g)].map((match) => match[1]))];

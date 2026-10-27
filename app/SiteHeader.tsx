@@ -5,6 +5,7 @@ import { MainNav, type NavItem } from "./MainNav";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { departments } from "./departamentos/departments";
+import { siteContacts } from "./lib/site-contacts";
 import { stores } from "./lojas/stores";
 
 const navItems: NavItem[] = [
@@ -21,7 +22,7 @@ export function SiteHeader() {
   return (
     <>
       <div className="utility-bar">
-        <span>Entrega para todo o Brasil</span>
+        <a href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer">Compre online no Mercado Livre</a>
         <i aria-hidden="true" />
         <span>5% OFF na primeira compra</span>
         <i aria-hidden="true" />
