@@ -329,7 +329,7 @@ test("every store has a page with its address, contacts, map link and structured
     assert.ok(html.includes(`CEP ${store.cep}`), `${store.name}: address`);
     assert.ok(html.includes(storeMapsUrl(store).replaceAll("&", "&amp;")), `${store.name}: Google Maps link`);
     assert.ok(html.includes(storeWhatsappLink(store).url.replaceAll("&", "&amp;")), `${store.name}: WhatsApp link`);
-    // The map iframe only loads when the visitor asks for it.
+    // The map iframe is only added in the browser, once the visitor's cookie choice is known.
     assert.doesNotMatch(html, /<iframe/);
 
     const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((match) => JSON.parse(match[1]));

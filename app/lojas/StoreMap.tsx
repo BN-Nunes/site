@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { Icon } from "../Icon";
 import { storeMapEmbedUrl, storeMapsUrl } from "../lib/store-contact";
+import { useGoogleMap } from "../lib/use-google-map";
 import type { Store } from "./stores";
 
-/** Mapa da loja. Como no rodapé, o Google Maps só é carregado quando o visitante pede (veja a política de cookies). */
+/** Mapa da loja. Carrega sozinho, como o do rodapé, exceto para quem escolheu "Somente necessários" (veja `useGoogleMap`). */
 export function StoreMap({ store }: { store: Store }) {
-  const [showMap, setShowMap] = useState(false);
+  const map = useGoogleMap();
 
   return (
     <div className="store-map">
-      {showMap ? (
+      {map.state === "map" ? (
         <iframe
           title={`Mapa da Impakto Festas ${store.name}`}
           src={storeMapEmbedUrl(store)}
@@ -26,8 +26,12 @@ export function StoreMap({ store }: { store: Store }) {
           <span aria-hidden="true"><Icon name="pin" size={26} /></span>
           <strong>Impakto {store.name}</strong>
           <small>{store.street}, {store.number} — {store.city}</small>
-          <button type="button" onClick={() => setShowMap(true)}>Carregar mapa</button>
-          <p>O mapa é do Google e só carrega quando você pede.</p>
+          {map.state === "button" && (
+            <>
+              <button type="button" onClick={map.load}>Carregar mapa</button>
+              <p>Você escolheu só os cookies necessários, então o mapa do Google carrega quando você pedir.</p>
+            </>
+          )}
         </div>
       )}
       <a href={storeMapsUrl(store)} target="_blank" rel="noreferrer">Abrir no Google Maps <Icon name="external" size={16} /></a>

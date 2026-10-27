@@ -28,7 +28,8 @@ export function CookieNotice() {
         <p>
           Usamos cookies necessários para manter sua sessão. Com sua permissão, também
           lembramos seu carrinho de orçamento e sua preferência de tema entre visitas.
-          O Google Maps só é carregado quando você escolhe abrir o mapa.
+          Os mapas das lojas vêm do Google Maps e carregam com a página; com
+          &quot;Somente necessários&quot;, só carregam quando você pedir.
         </p>
       </div>
       <div className="cookie-notice-actions">

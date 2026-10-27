@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
             <ul>
               <li><b>Supabase:</b> autenticação de contas, armazenamento de dados de perfil, endereços e orçamentos salvos, e a estatística de orçamentos enviados.</li>
               <li><b>Vercel:</b> hospedagem do site, logs técnicos de acesso e estatísticas de visita (Vercel Web Analytics).</li>
-              <li><b>Google Maps:</b> exibição de mapas das nossas lojas, carregado apenas quando você opta por abri-lo.</li>
+              <li><b>Google Maps:</b> exibição dos mapas das nossas lojas, carregados junto com a página (ou só quando você pedir, se escolher &quot;Somente necessários&quot; no aviso de cookies).</li>
               <li><b>WhatsApp/Meta:</b> canal de comunicação para envio de orçamentos e atendimento, quando você escolhe usá-lo.</li>
               <li><b>Mercado Pago:</b> integração de pagamentos mantida desativada; será mencionada nesta política com detalhes de tratamento de dados apenas se e quando um checkout for efetivamente ativado.</li>
             </ul>

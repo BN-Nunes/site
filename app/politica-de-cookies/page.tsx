@@ -68,13 +68,13 @@ export default function CookiePolicyPage() {
             </div>
 
             <h2>3. Cookies de terceiros</h2>
-            <p>O mapa do Google não é carregado automaticamente. Somente após a escolha de abrir o mapa o navegador estabelece conexão com o Google Maps, que poderá tratar dados técnicos e utilizar tecnologias próprias conforme suas políticas.</p>
+            <p>O mapa do rodapé e os mapas das páginas de cada loja vêm do Google Maps e carregam junto com a página. Nesse momento o navegador se conecta ao Google, que poderá tratar dados técnicos e utilizar tecnologias próprias, como cookies, conforme as políticas dele. Se você escolher &quot;Somente necessários&quot;, os mapas só carregam quando você clicar em &quot;Carregar mapa&quot;.</p>
 
             <p><b>Estatísticas de visita:</b> o site usa o Vercel Web Analytics, da nossa empresa de hospedagem, para contar visitas e páginas vistas. Ele não usa cookies nem grava nada no seu navegador, por isso não depende da escolha abaixo. Os relatórios mostram apenas números agregados.</p>
 
             <h2>4. Suas escolhas</h2>
             <p>Ao visitar o site pela primeira vez, você vê um aviso com três opções:</p>
-            <p><b>&quot;Somente necessários&quot;:</b> mantemos apenas o essencial para o site funcionar (sessão de login e o registro da sua própria escolha). O carrinho de orçamento e o tema deixam de ser salvos entre visitas — o carrinho continua funcionando durante a navegação, mas não é gravado no seu navegador.</p>
+            <p><b>&quot;Somente necessários&quot;:</b> mantemos apenas o essencial para o site funcionar (sessão de login e o registro da sua própria escolha). O carrinho de orçamento e o tema deixam de ser salvos entre visitas — o carrinho continua funcionando durante a navegação, mas não é gravado no seu navegador. Os mapas do Google também deixam de carregar sozinhos e só aparecem quando você clicar em &quot;Carregar mapa&quot;.</p>
             <p><b>&quot;Aceitar funcionalidades&quot;:</b> além do necessário, passamos a lembrar seu carrinho de orçamento e sua preferência de tema (claro/escuro) entre visitas.</p>
             <p><b>&quot;Ver política&quot;:</b> abre esta página antes de decidir.</p>
             <p>Se você já escolheu &quot;Aceitar funcionalidades&quot; e depois muda para &quot;Somente necessários&quot;, removemos imediatamente o carrinho e o tema já salvos no seu navegador.</p>
@@ -96,7 +96,7 @@ export default function CookiePolicyPage() {
               <li>Sem cookies de publicidade.</li>
               <li>Estatísticas de visita sem cookies (Vercel Web Analytics).</li>
               <li>Carrinho e tema só ficam salvos se você aceitar.</li>
-              <li>Google Maps somente após sua ação.</li>
+              <li>Mapas do Google carregam com a página; com &quot;Somente necessários&quot;, só no clique.</li>
               <li>Mude sua escolha quando quiser em &quot;Gerenciar cookies&quot;.</li>
             </ul>
             <Link href="/">Voltar para a página inicial →</Link>
