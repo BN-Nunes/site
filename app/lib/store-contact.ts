@@ -1,4 +1,4 @@
-import type { Store } from "../lojas/stores.ts";
+import { storeAddress, type Store } from "../lojas/stores.ts";
 import { siteContacts } from "./site-contacts.ts";
 
 /** "5511973540454" → "(11) 97354-0454"; "551146155083" → "(11) 4615-5083". */
@@ -22,6 +22,20 @@ export function storeWhatsappLink(store: Store): { url: string; direct: boolean;
     direct: Boolean(store.whatsapp),
     display: formatPhoneNumber(phone),
   };
+}
+
+function storeMapsQuery(store: Store): string {
+  return `Impakto Festas ${storeAddress(store)}`;
+}
+
+/** Busca da loja no Google Maps, de onde o cliente traça a rota. */
+export function storeMapsUrl(store: Store): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeMapsQuery(store))}`;
+}
+
+/** A mesma busca em formato de mapa incorporado (iframe), que só é carregado quando o visitante pede. */
+export function storeMapEmbedUrl(store: Store): string {
+  return `https://www.google.com/maps?q=${encodeURIComponent(storeMapsQuery(store))}&output=embed`;
 }
 
 /** Link `tel:` do telefone fixo da filial, ou `null` quando a loja não divulga um. */

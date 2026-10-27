@@ -30,6 +30,20 @@ export const stores: Store[] = [
   { name: "Osasco", cnpj: "11.588.752/0009-99", cep: "06016-004", street: "Av. Dona Primitiva Vianco", number: "578", city: "Osasco", state: "SP", lat: -23.5334036, lng: -46.7755525 },
 ];
 
+/** Endereço da página da loja: "Santo André" → "santo-andre", "Guarulhos 3" → "guarulhos-3". */
+export function storeSlug(store: Store): string {
+  return store.name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function getStore(slug: string): Store | undefined {
+  return stores.find((store) => storeSlug(store) === slug);
+}
+
 export function storeAddress(store: Store) {
   return `${store.street}, ${store.number} — ${store.city}/${store.state}, CEP ${store.cep}`;
 }

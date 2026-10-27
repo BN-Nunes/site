@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { storeAddress, stores } from "./stores";
+import Link from "next/link";
+import { StoreActions } from "./StoreActions";
+import { storeSlug, stores } from "./stores";
 import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
 import { normalize } from "../lib/search";
 import { storePhoneLink, storeWhatsappLink } from "../lib/store-contact";
@@ -110,18 +112,18 @@ export function StoresExplorer() {
       {filteredStores.length > 0 ? (
         <div className="stores-grid">
           {filteredStores.map((store, index) => {
-            const address = storeAddress(store);
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Impakto Festas ${address}`)}`;
+            const storeUrl = `/lojas/${storeSlug(store)}`;
             const distanceKm = store.distanceKm;
             const whatsapp = storeWhatsappLink(store);
             const phone = storePhoneLink(store);
             return (
               <article className="store-card" key={store.cnpj}>
-                <div className="store-photo">
+                {/* A foto leva à mesma página do título; fica fora da navegação por teclado para não repetir o link. */}
+                <Link className="store-photo" href={storeUrl} tabIndex={-1} aria-hidden="true">
                   {store.photo
-                    ? <img src={store.photo} alt={`Fachada da Impakto Festas ${store.name}`} width={800} height={480} loading="lazy" decoding="async" />
-                    : <span aria-hidden="true">Impakto {store.name}</span>}
-                </div>
+                    ? <img src={store.photo} alt="" width={800} height={480} loading="lazy" decoding="async" />
+                    : <span>Impakto {store.name}</span>}
+                </Link>
                 <div className="store-card-top">
                   <span className="store-number">{String(index + 1).padStart(2, "0")}</span>
                   {index === 0 && distanceKm !== undefined ? (
@@ -130,7 +132,7 @@ export function StoresExplorer() {
                     <span className="store-status"><i /> Unidade ativa</span>
                   )}
                 </div>
-                <h2>Impakto {store.name}</h2>
+                <h2><Link href={storeUrl}>Impakto {store.name}</Link></h2>
                 <address><Icon name="pin" size={20} /><span>{store.street}, {store.number}<br />{store.city} — {store.state}<br />CEP {store.cep}</span></address>
                 <div className="store-meta">
                   <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
@@ -138,19 +140,7 @@ export function StoresExplorer() {
                   {phone && <p className="store-cnpj"><span>Telefone</span>{phone.display}</p>}
                 </div>
                 {distanceKm !== undefined && <p className="store-distance">A {formatDistanceKm(distanceKm)} de você</p>}
-                <div className={phone ? "store-actions has-phone" : "store-actions"}>
-                  <a className="store-map-button" href={mapsUrl} target="_blank" rel="noreferrer">Como chegar <Icon name="external" size={16} /></a>
-                  <a
-                    className="store-whatsapp-button"
-                    href={whatsapp.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`Falar com a Impakto ${store.name} pelo WhatsApp ${whatsapp.display}${whatsapp.direct ? "" : " (atendimento central)"}`}
-                  >
-                    <img src="/whatsapp-logo.png" alt="" width={200} height={200} loading="lazy" decoding="async" /> WhatsApp
-                  </a>
-                  {phone && <a className="store-call-button" href={phone.href} aria-label={`Ligar para a Impakto ${store.name}: ${phone.display}`}><Icon name="phone" size={16} /> Ligar</a>}
-                </div>
+                <StoreActions store={store} />
               </article>
             );
           })}

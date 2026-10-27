@@ -55,10 +55,16 @@ Veja `.env.example`. Resumo:
 - `app/departamentos/` — dados dos departamentos, página de departamento e card de produto.
 - `app/busca/` — página de resultados; a lógica de busca está em `app/lib/search.ts`.
 - `app/carrinho/` — carrinho de orçamento e montagem da mensagem (`app/lib/quote-message.ts`).
-- `app/lojas/` — lista de filiais (`stores.ts`) com filtro e ordenação por distância. O número de lojas nas páginas sai dessa lista; a única exceção é `public/og-festas.png` (prévia de compartilhamento), que tem o número escrito na imagem e precisa ser refeita quando uma loja abre ou fecha.
+- `app/lojas/` — lista de filiais (`stores.ts`) com filtro e ordenação por distância, e uma página por loja (`/lojas/[slug]`, com mapa, contatos e lojas próximas). O endereço da página sai do nome da loja (`storeSlug`), então renomear uma loja muda o link dela. O número de lojas nas páginas sai dessa lista; a única exceção é `public/og-festas.png` (prévia de compartilhamento), que tem o número escrito na imagem e precisa ser refeita quando uma loja abre ou fecha.
 - `app/lib/site-contacts.ts` — telefones, WhatsApp, e-mail, endereço e o link da loja no Mercado Livre: altere aqui, não nas páginas.
 - `public/marcas/mercado-livre.png` — símbolo do Mercado Livre usado nos links para a loja oficial. Foi recortado de uma imagem pequena enviada pela equipe (78×54), por isso só aparece em tamanho pequeno; se chegar o arquivo oficial, substitua por ele com um nome novo.
 - `supabase/migrations/` — SQL das tabelas; aplique manualmente no SQL Editor do Supabase.
+
+## Estatísticas
+
+- **Visitas:** Vercel Web Analytics (painel do projeto na Vercel → Analytics). Não usa cookies, por isso carrega sem depender do aviso de cookies. O script só é incluído nos deploys da Vercel (`process.env.VERCEL`).
+- **Orçamentos:** cada envio pelo carrinho grava a loja e os itens em `quote_events`, sem nome nem observações (`app/lib/quote-events.ts`). Os relatórios ficam no Supabase, Table Editor, schema `relatorios`: orçamentos por loja, por dia e produtos mais pedidos. Requer aplicar `supabase/migrations/20261027_quote_events.sql`; antes disso o registro falha em silêncio e o WhatsApp funciona normalmente.
+- Se mudar o que é coletado, atualize as políticas de privacidade e de cookies.
 
 ## Deploy
 

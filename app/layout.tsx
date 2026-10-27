@@ -62,6 +62,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <WhatsAppFloat />
           <CookieNotice />
         </CartProvider>
+        {/* Vercel Web Analytics: conta visitas sem cookies. O script só existe nos deploys da Vercel (fora dela daria 404). */}
+        {process.env.VERCEL === "1" && <script defer src="/_vercel/insights/script.js" />}
       </body>
     </html>
   );

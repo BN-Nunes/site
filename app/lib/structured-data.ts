@@ -1,7 +1,8 @@
 import type { Department, Product } from "../departamentos/departments";
-import type { Store } from "../lojas/stores";
+import { storeSlug, type Store } from "../lojas/stores";
 import { getSiteUrl } from "./site-config";
 import { siteContacts } from "./site-contacts";
+import { storeMapsUrl } from "./store-contact";
 
 export function organizationJsonLd() {
   const base = getSiteUrl();
@@ -18,12 +19,16 @@ export function organizationJsonLd() {
 
 export function storeJsonLd(store: Store) {
   const base = getSiteUrl();
+  const url = `${base}/lojas/${storeSlug(store)}`;
+  const telephone = store.phone ?? store.whatsapp;
   return {
     "@context": "https://schema.org",
     "@type": "Store",
+    "@id": `${url}#loja`,
     name: `${siteContacts.tradeName} ${store.name}`,
     taxID: store.cnpj,
-    url: `${base}/lojas`,
+    url,
+    ...(store.photo ? { image: `${base}${store.photo}` } : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: `${store.street}, ${store.number}`,
@@ -32,20 +37,25 @@ export function storeJsonLd(store: Store) {
       postalCode: store.cep,
       addressCountry: "BR",
     },
-    ...(store.whatsapp ? { telephone: `+${store.whatsapp}` } : {}),
+    geo: { "@type": "GeoCoordinates", latitude: store.lat, longitude: store.lng },
+    hasMap: storeMapsUrl(store),
+    ...(telephone ? { telephone: `+${telephone}` } : {}),
+    parentOrganization: { "@type": "Organization", name: siteContacts.tradeName, url: base },
   };
 }
 
-export function breadcrumbJsonLd(department: Department) {
+/** Trilha "Início › … › página atual"; cada item recebe o caminho da página, sem o domínio. */
+export function breadcrumbJsonLd(trail: Array<{ name: string; path: string }>) {
   const base = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Início", item: base },
-      { "@type": "ListItem", position: 2, name: "Departamentos", item: `${base}/#categorias` },
-      { "@type": "ListItem", position: 3, name: department.name, item: `${base}/departamentos/${department.slug}` },
-    ],
+    itemListElement: [{ name: "Início", path: "/" }, ...trail].map((crumb, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: crumb.name,
+      item: `${base}${crumb.path}`,
+    })),
   };
 }
 

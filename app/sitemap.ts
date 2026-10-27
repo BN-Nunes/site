@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { departments } from "./departamentos/departments";
 import { getSiteUrl } from "./lib/site-config";
+import { storeSlug, stores } from "./lojas/stores";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
@@ -19,5 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...departmentRoutes];
+  const storeRoutes: MetadataRoute.Sitemap = stores.map((store) => ({
+    url: `${base}/lojas/${storeSlug(store)}`,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...departmentRoutes, ...storeRoutes];
 }

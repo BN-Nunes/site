@@ -42,7 +42,7 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
 
   return (
     <main className="department-main" id="conteudo">
-      <JsonLd data={breadcrumbJsonLd(department)} />
+      <JsonLd data={breadcrumbJsonLd([{ name: "Departamentos", path: "/#categorias" }, { name: department.name, path: `/departamentos/${department.slug}` }])} />
       {department.products.map((product) => <JsonLd key={product.id} data={productJsonLd(product, department)} />)}
 
       <section className={`department-hero ${department.className}`}>

@@ -9,8 +9,9 @@ import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/li
 import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
 import { departments } from "../app/departamentos/departments.ts";
-import { stores } from "../app/lojas/stores.ts";
-import { formatPhoneNumber, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
+import { getStore, storeSlug, stores } from "../app/lojas/stores.ts";
+import { formatPhoneNumber, storeMapEmbedUrl, storeMapsUrl, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
+import { buildQuoteEvent } from "../app/lib/quote-events.ts";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -62,6 +63,7 @@ test("main routes return 200", async () => {
     "/politica-de-cookies",
     "/politica-de-privacidade",
     "/departamentos/festas-tematicas",
+    "/lojas/perdizes",
     "/busca",
     "/busca?q=copos",
   ];
@@ -74,6 +76,11 @@ test("main routes return 200", async () => {
 
 test("an unknown department returns 404", async () => {
   const { status } = await render("/departamentos/departamento-que-nao-existe");
+  assert.equal(status, 404);
+});
+
+test("an unknown store returns 404", async () => {
+  const { status } = await render("/lojas/loja-que-nao-existe");
   assert.equal(status, 404);
 });
 
@@ -291,12 +298,90 @@ test("store WhatsApp numbers are valid São Paulo mobiles and never shared betwe
 });
 
 test("pages show the real store count instead of a hard-coded one", async () => {
-  for (const path of ["/", "/busca?q=balao"]) {
+  for (const path of ["/", "/busca?q=balao", "/lojas/perdizes"]) {
     const { html } = await render(path);
     const counts = [...html.matchAll(/(\d+)(?:<!-- -->)? (?:lojas|filiais)\b/g)].map((match) => Number(match[1]));
     assert.ok(counts.length > 0, `${path} should mention the number of stores`);
     for (const count of counts) assert.equal(count, stores.length, `${path} mentions ${count} stores`);
   }
+});
+
+test("store page addresses are readable, unique and lead back to the store", () => {
+  assert.equal(storeSlug(stores.find((store) => store.name === "Santo André")), "santo-andre");
+  assert.equal(storeSlug(stores.find((store) => store.name === "Guarulhos 3")), "guarulhos-3");
+  const slugs = stores.map(storeSlug);
+  assert.equal(new Set(slugs).size, stores.length);
+  for (const slug of slugs) {
+    assert.match(slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    assert.equal(storeSlug(getStore(slug)), slug);
+  }
+  assert.equal(getStore("loja-que-nao-existe"), undefined);
+});
+
+test("every store has a page with its address, contacts, map link and structured data", async () => {
+  for (const store of stores) {
+    const slug = storeSlug(store);
+    const { status, html } = await render(`/lojas/${slug}`);
+    assert.equal(status, 200, `/lojas/${slug}`);
+    assert.ok(html.includes(`<title>Loja ${store.name} | Impakto Festas</title>`), `${store.name}: title`);
+    assert.match(html, new RegExp(`<link rel="canonical" href="[^"]+/lojas/${slug}"`));
+    assert.ok(html.includes(`Impakto <strong>${store.name}</strong>`), `${store.name}: H1`);
+    assert.ok(html.includes(`CEP ${store.cep}`), `${store.name}: address`);
+    assert.ok(html.includes(storeMapsUrl(store).replaceAll("&", "&amp;")), `${store.name}: Google Maps link`);
+    assert.ok(html.includes(storeWhatsappLink(store).url.replaceAll("&", "&amp;")), `${store.name}: WhatsApp link`);
+    // The map iframe only loads when the visitor asks for it.
+    assert.doesNotMatch(html, /<iframe/);
+
+    const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((match) => JSON.parse(match[1]));
+    const storeData = jsonLd.find((data) => data["@type"] === "Store");
+    assert.ok(storeData, `${store.name}: Store JSON-LD`);
+    assert.deepEqual(storeData.geo, { "@type": "GeoCoordinates", latitude: store.lat, longitude: store.lng });
+    assert.match(storeData.url, new RegExp(`/lojas/${slug}$`));
+    assert.ok(jsonLd.some((data) => data["@type"] === "BreadcrumbList"), `${store.name}: breadcrumb`);
+
+    // Three other stores are suggested, each linking to its own page.
+    const nearby = [...html.matchAll(/<a href="\/lojas\/([a-z0-9-]+)" class="store-nearby-card"/g)].map((match) => match[1]);
+    assert.equal(nearby.length, 3, `${store.name}: nearby stores`);
+    assert.ok(!nearby.includes(slug), `${store.name} should not suggest itself`);
+  }
+});
+
+test("the store list links each card to its store page, and the sitemap lists every store page", async () => {
+  const html = (await render("/lojas")).html.replaceAll("<!-- -->", "");
+  const { html: sitemap } = await render("/sitemap.xml");
+  for (const store of stores) {
+    assert.ok(html.includes(`<h2><a href="/lojas/${storeSlug(store)}">Impakto ${store.name}</a></h2>`), `/lojas: ${store.name}`);
+    assert.match(sitemap, new RegExp(`<loc>[^<]+/lojas/${storeSlug(store)}</loc>`), `sitemap: ${store.name}`);
+  }
+});
+
+test("the store map embeds and links to the same Google Maps search", () => {
+  const perdizes = getStore("perdizes");
+  const query = encodeURIComponent("Impakto Festas Rua Cardoso de Almeida, 859 — São Paulo/SP, CEP 05013-001");
+  assert.equal(storeMapsUrl(perdizes), `https://www.google.com/maps/search/?api=1&query=${query}`);
+  assert.equal(storeMapEmbedUrl(perdizes), `https://www.google.com/maps?q=${query}&output=embed`);
+});
+
+test("the quote statistics record the store and items, but nothing that identifies the customer", () => {
+  const cart = [
+    { id: "bal-buque-colorido", sku: "BAL-001", name: "Buquê de Balões Coloridos", description: "…", department: "Balões", image: "/products/baloes-buque.jpg", price: "Preço sob consulta", quantity: 3 },
+  ];
+  assert.deepEqual(buildQuoteEvent(getStore("perdizes"), cart, false), {
+    store_cnpj: "11.588.752/0012-94",
+    store_name: "Perdizes",
+    signed_in: false,
+    items: [{ id: "bal-buque-colorido", sku: "BAL-001", name: "Buquê de Balões Coloridos", department: "Balões", quantity: 3 }],
+  });
+});
+
+test("the visit statistics script is only included on Vercel deployments", async (t) => {
+  const original = process.env.VERCEL;
+  t.after(() => { if (original === undefined) delete process.env.VERCEL; else process.env.VERCEL = original; });
+
+  delete process.env.VERCEL;
+  assert.doesNotMatch((await render("/")).html, /_vercel\/insights/);
+  process.env.VERCEL = "1";
+  assert.match((await render("/")).html, /<script defer="" src="\/_vercel\/insights\/script\.js"><\/script>/);
 });
 
 test("store WhatsApp link names the store and falls back to the central number", () => {

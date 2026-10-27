@@ -631,6 +631,58 @@ html[data-theme="dark"] .stores-hero h1,html[data-theme="dark"] .cart-hero h1,ht
 .store-photo img{width:100%;height:100%;object-fit:cover}
 .store-photo span{height:100%;display:flex;align-items:flex-end;padding:16px;color:#fff;font-family:var(--font-display);font-size:24px;font-weight:800;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.25)}
 .store-card h2{font-weight:800}
+.store-photo{display:block}
+.store-card h2 a{color:inherit;transition:color .2s}
+.store-card h2 a:hover,.store-card h2 a:focus-visible{color:var(--pink);text-decoration:underline;text-underline-offset:4px}
+
+/* Store page: hero with the storefront photo, contact facts + map on demand, nearby stores */
+.store-page-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);align-items:center;gap:56px}
+.store-page-hero h1{margin:14px 0 18px}
+.store-page-address{display:flex;align-items:flex-start;gap:11px;margin:0 0 24px;color:var(--muted);font-size:17px;line-height:1.55;font-style:normal}
+.store-page-address>.icon{flex:0 0 auto;margin-top:3px;color:var(--pink)}
+.store-page-actions{max-width:520px}
+.store-page-photo{position:relative;z-index:1;overflow:hidden;border:6px solid #fff;border-radius:28px;aspect-ratio:5/3;background:var(--brand-deep) url(/brand/pills.svg) no-repeat right -40px center/60%;box-shadow:0 24px 50px rgba(43,17,112,.2);transform:rotate(1.5deg)}
+.store-page-photo img{width:100%;height:100%;object-fit:cover}
+.store-page-photo span{height:100%;display:flex;align-items:flex-end;padding:24px;color:#fff;font-family:var(--font-display);font-size:34px;font-weight:800;line-height:1}
+.store-page-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;align-items:stretch}
+.store-page-info{padding:32px;border:1px solid var(--line);border-radius:24px;background:var(--white);box-shadow:0 8px 22px rgba(43,17,112,.06)}
+.store-page-info h2{margin:8px 0 20px;color:var(--ink);font-size:clamp(26px,2.2vw,34px);line-height:1.1}
+.store-page-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;margin:0 0 26px}
+.store-page-facts div:first-child{grid-column:1/-1}
+.store-page-facts dt{color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.store-page-facts dd{margin:4px 0 0;color:var(--ink);font-size:15px;font-weight:700;line-height:1.45}
+.store-page-quote{padding:22px;border-radius:18px;background:var(--brand-soft)}
+.store-page-quote h3{margin:0 0 6px;color:var(--ink);font-size:20px}
+.store-page-quote p{margin:0 0 16px;color:var(--muted);line-height:1.55}
+.store-map{position:relative;min-height:420px;overflow:hidden;border-radius:24px;background:linear-gradient(135deg,#f1ecfb,#d9f4e8);box-shadow:0 8px 22px rgba(43,17,112,.06)}
+.store-map iframe{display:block;width:100%;height:100%;min-height:420px;border:0}
+.store-map-placeholder{height:100%;min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:64px 32px 32px;text-align:center;color:#2b1170}
+.store-map-placeholder>span{width:58px;height:58px;display:grid;place-items:center;margin-bottom:8px;border-radius:50%;background:#4524a8;color:#fff}
+.store-map-placeholder strong{font-family:var(--font-display);font-size:24px;line-height:1.1}
+.store-map-placeholder small{color:#4a3d6b;font-size:14px}
+.store-map-placeholder button{margin-top:14px;padding:12px 22px;border:0;border-radius:999px;background:#2b1170;color:#fff;font-size:14px;font-weight:900;cursor:pointer;transition:.2s}
+.store-map-placeholder button:hover{background:var(--c-pink)}
+.store-map-placeholder p{margin:8px 0 0;color:#4a3d6b;font-size:12px}
+.store-map>a{position:absolute;right:16px;top:16px;display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;background:#fff;color:#4524a8;box-shadow:0 5px 14px rgba(0,0,0,.15);font-size:13px;font-weight:900;transition:.2s}
+.store-map>a:hover{transform:translateY(-2px)}
+.store-nearby{padding-top:0}
+.store-nearby-all{display:inline-flex;align-items:center;gap:6px;color:var(--brand);font-weight:900;white-space:nowrap}
+.store-nearby-all:hover{color:var(--pink)}
+.store-nearby-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none}
+.store-nearby-card{height:100%;display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:16px;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--white);box-shadow:0 8px 22px rgba(43,17,112,.06);transition:.25s}
+.store-nearby-card:hover{transform:translateY(-4px);border-color:rgba(69,36,168,.24);box-shadow:0 16px 32px rgba(43,17,112,.12)}
+.store-nearby-photo{overflow:hidden;display:grid;place-items:center;border-radius:14px;aspect-ratio:1;background:var(--brand-deep) url(/brand/pills.svg) no-repeat center/90%;color:#fff}
+.store-nearby-photo img{width:100%;height:100%;object-fit:cover}
+.store-nearby-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.store-nearby-copy strong{color:var(--ink);font-family:var(--font-display);font-size:19px;line-height:1.1}
+.store-nearby-copy small{color:var(--muted);font-size:13px;line-height:1.4}
+.store-nearby-copy em{color:var(--pink-text);font-size:12px;font-style:normal;font-weight:900}
+html[data-theme="dark"] .store-page-photo{border-color:var(--surface-raised)}
+html[data-theme="dark"] .store-page-info,html[data-theme="dark"] .store-nearby-card{background:var(--surface)}
+@media (max-width:1050px){.store-page-grid{grid-template-columns:1fr}.store-nearby-list{grid-template-columns:1fr 1fr}}
+@media (max-width:820px){.store-page-hero-grid{grid-template-columns:1fr;gap:36px}.store-page-photo{transform:none}}
+@media (max-width:720px){.store-nearby-list{grid-template-columns:1fr}.store-page-info{padding:24px 20px}.store-map,.store-map iframe,.store-map-placeholder{min-height:340px}.store-nearby .section-title{flex-direction:column;align-items:flex-start}}
+@media (max-width:480px){.store-page-facts{grid-template-columns:1fr}.store-page-address{font-size:15px}}
 
 /* Footer: pills stripe, logo and tagline */
 .footer{padding-top:0;background:var(--brand-deep)}

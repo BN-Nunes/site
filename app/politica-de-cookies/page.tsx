@@ -44,7 +44,7 @@ export default function CookiePolicyPage() {
           <span className="eyebrow">Privacidade</span>
           <h1>Política de cookies</h1>
           <p>Entenda quais recursos ficam armazenados no seu navegador e para que eles são utilizados.</p>
-          <small>Última atualização: 27 de julho de 2026.</small>
+          <small>Última atualização: 27 de outubro de 2026.</small>
         </div>
       </section>
 
@@ -70,6 +70,8 @@ export default function CookiePolicyPage() {
             <h2>3. Cookies de terceiros</h2>
             <p>O mapa do Google não é carregado automaticamente. Somente após a escolha de abrir o mapa o navegador estabelece conexão com o Google Maps, que poderá tratar dados técnicos e utilizar tecnologias próprias conforme suas políticas.</p>
 
+            <p><b>Estatísticas de visita:</b> o site usa o Vercel Web Analytics, da nossa empresa de hospedagem, para contar visitas e páginas vistas. Ele não usa cookies nem grava nada no seu navegador, por isso não depende da escolha abaixo. Os relatórios mostram apenas números agregados.</p>
+
             <h2>4. Suas escolhas</h2>
             <p>Ao visitar o site pela primeira vez, você vê um aviso com três opções:</p>
             <p><b>&quot;Somente necessários&quot;:</b> mantemos apenas o essencial para o site funcionar (sessão de login e o registro da sua própria escolha). O carrinho de orçamento e o tema deixam de ser salvos entre visitas — o carrinho continua funcionando durante a navegação, mas não é gravado no seu navegador.</p>
@@ -92,7 +94,7 @@ export default function CookiePolicyPage() {
             <h2>Resumo rápido</h2>
             <ul>
               <li>Sem cookies de publicidade.</li>
-              <li>Sem analytics no momento.</li>
+              <li>Estatísticas de visita sem cookies (Vercel Web Analytics).</li>
               <li>Carrinho e tema só ficam salvos se você aceitar.</li>
               <li>Google Maps somente após sua ação.</li>
               <li>Mude sua escolha quando quiser em &quot;Gerenciar cookies&quot;.</li>

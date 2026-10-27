@@ -8,6 +8,7 @@ import { stores } from "../lojas/stores";
 import { getSupabaseBrowserClient } from "../supabase-client";
 import { createQuoteRequest } from "../conta/customer-data";
 import { MAX_QUANTITY, MIN_QUANTITY } from "../lib/cart-quantity";
+import { buildQuoteEvent, recordQuoteEvent } from "../lib/quote-events";
 import { siteContacts } from "../lib/site-contacts";
 import { buildQuoteMessage, MAX_QUOTE_NOTES_LENGTH } from "../lib/quote-message";
 
@@ -49,10 +50,11 @@ export function CartClient() {
     setQuoteSent(true);
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
-    // Salva o orçamento apenas se o visitante estiver autenticado; nada é
-    // persistido para quem não tem conta — o WhatsApp continua funcionando normalmente.
+    // Todo envio entra na estatística de orçamentos por loja e produto, sem nome nem
+    // observações. Quem está logado também ganha o orçamento no histórico da conta.
     supabase.auth.getSession().then(({ data }) => {
       const userId = data.session?.user.id;
+      recordQuoteEvent(supabase, buildQuoteEvent(selectedStore, items, Boolean(userId)));
       if (!userId) return;
       createQuoteRequest(supabase, userId, {
         store_cnpj: selectedStore.cnpj,

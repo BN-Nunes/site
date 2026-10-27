@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
           <span className="eyebrow">Privacidade</span>
           <h1>Política de privacidade</h1>
           <p>Como a {knownContact.tradeName} coleta, usa e protege dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).</p>
-          <small>Última atualização: 27 de julho de 2026.</small>
+          <small>Última atualização: 27 de outubro de 2026.</small>
         </div>
       </section>
 
@@ -45,19 +45,21 @@ export default function PrivacyPolicyPage() {
             <p><b>Interações com WhatsApp:</b> ao clicar em &quot;Falar pelo WhatsApp&quot; ou enviar um orçamento, você é direcionado ao aplicativo WhatsApp/Meta com uma mensagem pré-preenchida contendo os itens escolhidos. Essa conversa passa a ocorrer diretamente entre você e a Impakto Festas dentro do WhatsApp, sob a política de privacidade da Meta.</p>
             <p><b>Cadastro para novidades por e-mail:</b> caso o site ofereça um formulário de inscrição para novidades, o e-mail informado só é utilizado com o seu consentimento explícito e pode ser removido a qualquer momento.</p>
             <p><b>Localização geográfica:</b> na página &quot;Nossas lojas&quot;, você pode optar por compartilhar sua localização para descobrir a filial mais próxima. Essa permissão é pedida pelo próprio navegador, é usada apenas naquele momento para ordenar a lista de filiais por distância, e não é enviada aos nossos servidores nem armazenada — fica apenas na memória da página enquanto você navega.</p>
+            <p><b>Estatísticas de visita:</b> usamos o Vercel Web Analytics para saber quantas pessoas visitam o site e quais páginas são mais vistas. Ele não usa cookies nem grava nada no seu navegador: cada visita é reconhecida por um código temporário, renovado todos os dias, e os relatórios mostram apenas números agregados, sem identificar ninguém.</p>
+            <p><b>Estatística de orçamentos:</b> quando você envia um orçamento pelo WhatsApp, registramos a loja escolhida e os produtos e quantidades da lista, para sabermos quais lojas e produtos recebem mais pedidos. Esse registro não inclui seu nome, suas observações nem sua conta.</p>
             <p><b>Dados técnicos e logs de hospedagem:</b> nossos provedores de hospedagem e infraestrutura (Vercel e, em ambientes alternativos, Cloudflare) processam automaticamente dados técnicos de acesso, como endereço IP, tipo de navegador e páginas acessadas, para operar e proteger o site.</p>
 
             <h2>3. Para que usamos os seus dados</h2>
-            <p>Usamos os dados coletados para: (i) criar e manter sua conta; (ii) processar e organizar orçamentos solicitados; (iii) permitir contato pelo WhatsApp ou e-mail sobre o seu pedido; (iv) manter a segurança e o funcionamento técnico do site; e (v), quando você consentir, enviar novidades e promoções.</p>
+            <p>Usamos os dados coletados para: (i) criar e manter sua conta; (ii) processar e organizar orçamentos solicitados; (iii) permitir contato pelo WhatsApp ou e-mail sobre o seu pedido; (iv) manter a segurança e o funcionamento técnico do site; (v) entender, com estatísticas agregadas, como o site é usado e quais lojas e produtos recebem mais orçamentos; e (vi), quando você consentir, enviar novidades e promoções.</p>
 
             <h2>4. Bases legais aplicáveis</h2>
-            <p>Tratamos os dados com base em: execução de solicitação do titular (art. 7º, V, LGPD) para orçamentos e atendimento; consentimento (art. 7º, I) para newsletter e cookies não essenciais; e legítimo interesse (art. 7º, IX) para segurança, prevenção a fraude e melhoria técnica do site, sempre de forma proporcional e informada.</p>
+            <p>Tratamos os dados com base em: execução de solicitação do titular (art. 7º, V, LGPD) para orçamentos e atendimento; consentimento (art. 7º, I) para newsletter e cookies não essenciais; e legítimo interesse (art. 7º, IX) para segurança, prevenção a fraude, estatísticas de uso e melhoria técnica do site, sempre de forma proporcional e informada.</p>
 
             <h2>5. Com quem compartilhamos dados (fornecedores)</h2>
             <p>Para operar o site, utilizamos os seguintes fornecedores, que atuam como operadores dos dados que processam em nosso nome:</p>
             <ul>
-              <li><b>Supabase:</b> autenticação de contas e armazenamento de dados de perfil, endereços e orçamentos salvos.</li>
-              <li><b>Vercel:</b> hospedagem do site e logs técnicos de acesso.</li>
+              <li><b>Supabase:</b> autenticação de contas, armazenamento de dados de perfil, endereços e orçamentos salvos, e a estatística de orçamentos enviados.</li>
+              <li><b>Vercel:</b> hospedagem do site, logs técnicos de acesso e estatísticas de visita (Vercel Web Analytics).</li>
               <li><b>Google Maps:</b> exibição de mapas das nossas lojas, carregado apenas quando você opta por abri-lo.</li>
               <li><b>WhatsApp/Meta:</b> canal de comunicação para envio de orçamentos e atendimento, quando você escolhe usá-lo.</li>
               <li><b>Mercado Pago:</b> integração de pagamentos mantida desativada; será mencionada nesta política com detalhes de tratamento de dados apenas se e quando um checkout for efetivamente ativado.</li>
@@ -99,6 +101,7 @@ export default function PrivacyPolicyPage() {
             <ul>
               <li>Não vendemos seus dados a terceiros.</li>
               <li>Orçamentos são enviados por você via WhatsApp.</li>
+              <li>Estatísticas de visita e de orçamentos sem cookies e sem identificar você.</li>
               <li>Localização é opcional, usada só para achar a loja mais próxima, e nunca sai do seu navegador.</li>
               <li>Você pode pedir acesso, correção ou exclusão a qualquer momento.</li>
               <li>Mercado Pago fica inativo até um checkout ser lançado.</li>
