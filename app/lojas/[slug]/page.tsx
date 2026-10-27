@@ -9,7 +9,7 @@ import { storePhoneLink, storeWhatsappLink } from "../../lib/store-contact";
 import { breadcrumbJsonLd, storeJsonLd } from "../../lib/structured-data";
 import { StoreActions } from "../StoreActions";
 import { StoreMap } from "../StoreMap";
-import { getStore, storeAddress, storeSlug, stores } from "../stores";
+import { getStore, storeAddress, storeHoursRows, storeSlug, stores } from "../stores";
 
 const NEARBY_STORES = 3;
 
@@ -50,6 +50,7 @@ export default async function StorePage({ params }: StorePageProps) {
 
   const whatsapp = storeWhatsappLink(store);
   const phone = storePhoneLink(store);
+  const hours = storeHoursRows(store);
   const nearbyStores = sortByDistance(stores.filter((candidate) => candidate !== store), store).slice(0, NEARBY_STORES);
 
   return (
@@ -64,6 +65,15 @@ export default async function StorePage({ params }: StorePageProps) {
             <span className="eyebrow">Loja Impakto Festas</span>
             <h1>Impakto <strong>{store.name}</strong></h1>
             <address className="store-page-address"><Icon name="pin" size={20} /><span>{store.street}, {store.number}<br />{store.city} — {store.state}, CEP {store.cep}</span></address>
+            {hours && (
+              <div className="store-page-hours">
+                <Icon name="clock" size={20} />
+                <div>
+                  <dl>{hours.map((row) => <div key={row.days}><dt>{row.days}</dt><dd>{row.time}</dd></div>)}</dl>
+                  <small>Em feriados o horário pode mudar. Na dúvida, confirme pelo WhatsApp.</small>
+                </div>
+              </div>
+            )}
             <StoreActions store={store} className="store-page-actions" />
           </div>
           <div className="store-page-photo">

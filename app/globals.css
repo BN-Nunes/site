@@ -641,6 +641,15 @@ html[data-theme="dark"] .stores-hero h1,html[data-theme="dark"] .cart-hero h1,ht
 .store-page-address{display:flex;align-items:flex-start;gap:11px;margin:0 0 24px;color:var(--muted);font-size:17px;line-height:1.55;font-style:normal}
 .store-page-address>.icon{flex:0 0 auto;margin-top:3px;color:var(--pink)}
 .store-page-actions{max-width:520px}
+.store-page-hours{display:flex;align-items:flex-start;gap:11px;margin:-10px 0 24px;color:var(--muted);font-size:15px;line-height:1.5}
+.store-page-hours>.icon{flex:0 0 auto;margin-top:2px;color:var(--pink)}
+.store-page-hours dl{display:grid;grid-template-columns:auto auto;justify-content:start;gap:2px 18px;margin:0}
+.store-page-hours dl div{display:contents}
+.store-page-hours dt{color:var(--ink);font-weight:800}
+.store-page-hours dd{margin:0}
+.store-page-hours small{display:block;margin-top:6px;font-size:12px}
+.store-card-hours{grid-column:1/-1}
+.store-card-hours span+span{color:inherit;font-size:inherit;font-weight:inherit;letter-spacing:0;text-transform:none}
 .store-page-photo{position:relative;z-index:1;overflow:hidden;border:6px solid #fff;border-radius:28px;aspect-ratio:5/3;background:var(--brand-deep) url(/brand/pills.svg) no-repeat right -40px center/60%;box-shadow:0 24px 50px rgba(43,17,112,.2);transform:rotate(1.5deg)}
 .store-page-photo img{width:100%;height:100%;object-fit:cover}
 .store-page-photo span{height:100%;display:flex;align-items:flex-end;padding:24px;color:#fff;font-family:var(--font-display);font-size:34px;font-weight:800;line-height:1}

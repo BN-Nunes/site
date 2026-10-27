@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { StoreActions } from "./StoreActions";
-import { storeSlug, stores } from "./stores";
+import { storeHoursRows, storeSlug, stores } from "./stores";
 import { formatDistanceKm, sortByDistance, type Coordinates } from "../lib/geolocation";
 import { normalize } from "../lib/search";
 import { storePhoneLink, storeWhatsappLink } from "../lib/store-contact";
@@ -116,6 +116,7 @@ export function StoresExplorer() {
             const distanceKm = store.distanceKm;
             const whatsapp = storeWhatsappLink(store);
             const phone = storePhoneLink(store);
+            const hours = storeHoursRows(store);
             return (
               <article className="store-card" key={store.cnpj}>
                 {/* A foto leva à mesma página do título; fica fora da navegação por teclado para não repetir o link. */}
@@ -138,6 +139,7 @@ export function StoresExplorer() {
                   <p className="store-cnpj"><span>CNPJ</span>{store.cnpj}</p>
                   <p className="store-cnpj"><span>WhatsApp</span>{whatsapp.direct ? whatsapp.display : "Pela central"}</p>
                   {phone && <p className="store-cnpj"><span>Telefone</span>{phone.display}</p>}
+                  {hours && <p className="store-cnpj store-card-hours"><span>Horário</span>{hours.map((row) => <span key={row.days}>{row.days}: {row.time}</span>)}</p>}
                 </div>
                 {distanceKm !== undefined && <p className="store-distance">A {formatDistanceKm(distanceKm)} de você</p>}
                 <StoreActions store={store} />

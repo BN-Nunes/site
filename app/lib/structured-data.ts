@@ -1,5 +1,5 @@
 import type { Department, Product } from "../departamentos/departments";
-import { storeSlug, type Store } from "../lojas/stores";
+import { storeSlug, type OpeningPeriod, type Store } from "../lojas/stores";
 import { getSiteUrl } from "./site-config";
 import { siteContacts } from "./site-contacts";
 import { storeMapsUrl } from "./store-contact";
@@ -40,8 +40,18 @@ export function storeJsonLd(store: Store) {
     geo: { "@type": "GeoCoordinates", latitude: store.lat, longitude: store.lng },
     hasMap: storeMapsUrl(store),
     ...(telephone ? { telephone: `+${telephone}` } : {}),
+    ...(store.hours ? { openingHoursSpecification: openingHoursJsonLd(store.hours) } : {}),
     parentOrganization: { "@type": "Organization", name: siteContacts.tradeName, url: base },
   };
+}
+
+function openingHoursJsonLd(hours: NonNullable<Store["hours"]>) {
+  const period = (dayOfWeek: string | string[], [opens, closes]: OpeningPeriod) => ({ "@type": "OpeningHoursSpecification", dayOfWeek, opens, closes });
+  return [
+    period(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], hours.weekdays),
+    ...(hours.saturday ? [period("Saturday", hours.saturday)] : []),
+    ...(hours.sunday ? [period("Sunday", hours.sunday)] : []),
+  ];
 }
 
 /** Trilha "Início › … › página atual"; cada item recebe o caminho da página, sem o domínio. */

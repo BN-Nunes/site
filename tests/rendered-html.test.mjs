@@ -9,7 +9,7 @@ import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/li
 import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
 import { departments } from "../app/departamentos/departments.ts";
-import { getStore, storeSlug, stores } from "../app/lojas/stores.ts";
+import { getStore, storeHoursRows, storeSlug, stores } from "../app/lojas/stores.ts";
 import { formatPhoneNumber, storeMapEmbedUrl, storeMapsUrl, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
 import { buildQuoteEvent } from "../app/lib/quote-events.ts";
 
@@ -338,6 +338,13 @@ test("every store has a page with its address, contacts, map link and structured
     assert.deepEqual(storeData.geo, { "@type": "GeoCoordinates", latitude: store.lat, longitude: store.lng });
     assert.match(storeData.url, new RegExp(`/lojas/${slug}$`));
     assert.ok(jsonLd.some((data) => data["@type"] === "BreadcrumbList"), `${store.name}: breadcrumb`);
+    if (store.hours) {
+      assert.deepEqual(storeData.openingHoursSpecification[0].opens, store.hours.weekdays[0], `${store.name}: opening hours JSON-LD`);
+      assert.ok(html.includes(`<dt>Segunda a sexta</dt><dd>${storeHoursRows(store)[0].time}</dd>`), `${store.name}: hours shown`);
+    } else {
+      assert.equal(storeData.openingHoursSpecification, undefined);
+      assert.ok(!html.includes("store-page-hours"), `${store.name}: no hours block without hours`);
+    }
 
     // Three other stores are suggested, each linking to its own page.
     const nearby = [...html.matchAll(/<a href="\/lojas\/([a-z0-9-]+)" class="store-nearby-card"/g)].map((match) => match[1]);
@@ -353,6 +360,22 @@ test("the store list links each card to its store page, and the sitemap lists ev
     assert.ok(html.includes(`<h2><a href="/lojas/${storeSlug(store)}">Impakto ${store.name}</a></h2>`), `/lojas: ${store.name}`);
     assert.match(sitemap, new RegExp(`<loc>[^<]+/lojas/${storeSlug(store)}</loc>`), `sitemap: ${store.name}`);
   }
+});
+
+test("store hours are well-formed and shown as weekday, Saturday and Sunday rows", () => {
+  for (const store of stores.filter((candidate) => candidate.hours)) {
+    for (const [opens, closes] of Object.values(store.hours)) {
+      assert.match(opens, /^([01]\d|2[0-3]):[0-5]\d$/, store.name);
+      assert.match(closes, /^([01]\d|2[0-3]):[0-5]\d$/, store.name);
+      assert.ok(opens < closes, `${store.name}: opens before it closes`);
+    }
+  }
+  assert.deepEqual(storeHoursRows(getStore("perdizes")), [
+    { days: "Segunda a sexta", time: "9h às 18h30" },
+    { days: "Sábado", time: "9h30 às 13h30" },
+    { days: "Domingo", time: "Fechado" },
+  ]);
+  assert.equal(storeHoursRows({ ...getStore("perdizes"), hours: undefined }), null);
 });
 
 test("the store map embeds and links to the same Google Maps search", () => {
