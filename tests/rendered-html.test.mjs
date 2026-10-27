@@ -271,6 +271,8 @@ test("every page links to the official Mercado Livre store, and the homepage has
   }
   const { html } = await render("/");
   assert.match(html, /<h2 id="marketplace-title">/);
+  assert.match(html, /<img class="ml-symbol" src="\/marcas\/mercado-livre\.png"/);
+  await access(new URL("../public/marcas/mercado-livre.png", import.meta.url));
 });
 
 test("every photo on the homepage exists in public/fotos", async () => {

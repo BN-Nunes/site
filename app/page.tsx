@@ -4,6 +4,7 @@ import { BrandWord } from "./BrandWord";
 import { CategoryExplorer } from "./CategoryExplorer";
 import { Icon, type IconName } from "./Icon";
 import { JsonLd } from "./JsonLd";
+import { MercadoLivreSymbol } from "./MercadoLivreSymbol";
 import { stores } from "./lojas/stores";
 import { canonicalUrl } from "./lib/site-config";
 import { siteContacts } from "./lib/site-contacts";
@@ -152,13 +153,13 @@ export default function Home() {
 
       <section className="marketplace-section section" aria-labelledby="marketplace-title">
         <div className="container marketplace-card">
-          <span className="marketplace-icon" aria-hidden="true"><Icon name="truck" size={30} /></span>
+          <span className="marketplace-icon" aria-hidden="true"><MercadoLivreSymbol /></span>
           <div>
             <span className="kicker">Compre online</span>
             <h2 id="marketplace-title">Prefere receber em casa?</h2>
             <p>Compre na loja oficial da Impakto Festas no Mercado Livre, com pagamento e entrega pelo próprio Mercado Livre.</p>
           </div>
-          <a className="button marketplace-button" href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer">Ir para o Mercado Livre <Icon name="external" size={18} /></a>
+          <a className="button marketplace-button" href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer"><MercadoLivreSymbol /> Ir para o Mercado Livre <Icon name="external" size={18} /></a>
         </div>
       </section>
 

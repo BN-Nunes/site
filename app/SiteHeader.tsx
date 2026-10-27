@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CartHeaderLink } from "./CartLinks";
 import { Icon } from "./Icon";
 import { MainNav, type NavItem } from "./MainNav";
+import { MercadoLivreSymbol } from "./MercadoLivreSymbol";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { departments } from "./departamentos/departments";
@@ -22,7 +23,7 @@ export function SiteHeader() {
   return (
     <>
       <div className="utility-bar">
-        <a href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer">Compre online no Mercado Livre</a>
+        <a href={siteContacts.mercadoLivreUrl} target="_blank" rel="noreferrer"><MercadoLivreSymbol /> Compre no Mercado Livre</a>
         <i aria-hidden="true" />
         <span>5% OFF na primeira compra</span>
         <i aria-hidden="true" />

@@ -56,7 +56,8 @@ Veja `.env.example`. Resumo:
 - `app/busca/` — página de resultados; a lógica de busca está em `app/lib/search.ts`.
 - `app/carrinho/` — carrinho de orçamento e montagem da mensagem (`app/lib/quote-message.ts`).
 - `app/lojas/` — lista de filiais (`stores.ts`) com filtro e ordenação por distância. O número de lojas nas páginas sai dessa lista; a única exceção é `public/og-festas.png` (prévia de compartilhamento), que tem o número escrito na imagem e precisa ser refeita quando uma loja abre ou fecha.
-- `app/lib/site-contacts.ts` — telefones, WhatsApp, e-mail e endereço: altere aqui, não nas páginas.
+- `app/lib/site-contacts.ts` — telefones, WhatsApp, e-mail, endereço e o link da loja no Mercado Livre: altere aqui, não nas páginas.
+- `public/marcas/mercado-livre.png` — símbolo do Mercado Livre usado nos links para a loja oficial. Foi recortado de uma imagem pequena enviada pela equipe (78×54), por isso só aparece em tamanho pequeno; se chegar o arquivo oficial, substitua por ele com um nome novo.
 - `supabase/migrations/` — SQL das tabelas; aplique manualmente no SQL Editor do Supabase.
 
 ## Deploy
