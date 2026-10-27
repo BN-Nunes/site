@@ -18,7 +18,7 @@ export type Store = {
 
 export const stores: Store[] = [
   { name: "Barueri", cnpj: "11.588.752/0003-01", cep: "06402-215", street: "Av. Henriqueta Mendes Guerra", number: "826", city: "Barueri", state: "SP", lat: -23.5101669, lng: -46.8829016, whatsapp: "5511973540454", phone: "551146155083", photo: "/fotos/lojas/barueri.webp" },
-  { name: "Cotia", cnpj: "11.588.752/0004-84", cep: "06713-100", street: "Estrada Municipal do Embu", number: "320", city: "Cotia", state: "SP", lat: -23.5996886, lng: -46.8588861, whatsapp: "5511940591588" },
+  { name: "Cotia", cnpj: "11.588.752/0004-84", cep: "06713-100", street: "Estrada Municipal do Embu", number: "320", city: "Cotia", state: "SP", lat: -23.5996886, lng: -46.8588861, whatsapp: "5511940591588", photo: "/fotos/lojas/cotia.webp" },
   { name: "Alphaville", cnpj: "11.588.752/0005-65", cep: "06455-000", street: "Alameda Araguaia", number: "200", city: "Barueri", state: "SP", lat: -23.4993140, lng: -46.8594570, whatsapp: "5511989008816", phone: "551146154994", photo: "/fotos/lojas/alphaville.webp" },
   { name: "Guarulhos", cnpj: "11.588.752/0010-22", cep: "07095-007", street: "Rua Nossa Senhora Mãe dos Homens", number: "318", city: "Guarulhos", state: "SP", lat: -23.4609538, lng: -46.5358310, whatsapp: "5511910813960", phone: "551124429358", photo: "/fotos/lojas/guarulhos.webp" },
   { name: "Morumbi", cnpj: "11.588.752/0008-08", cep: "05640-004", street: "Av. Dr. Guilherme Dumont Villares", number: "2031", city: "São Paulo", state: "SP", lat: -23.6232826, lng: -46.7375340, whatsapp: "5511913727297", phone: "551146155061" },
