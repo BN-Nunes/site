@@ -17,7 +17,7 @@ export type Store = {
   phone?: string;
   /** Foto da fachada (do site oficial ou enviada pela equipe da loja), quando houver. */
   photo?: string;
-  /** Horário de funcionamento, da ficha da loja no Google Maps (consultada em 27/10/2026). Dia sem horário = fechado. */
+  /** Horário de funcionamento, da ficha da loja no Google Maps (consultada em 27/10/2026) ou enviado pela equipe (Guarulhos 3). Dia sem horário = fechado. */
   hours?: { weekdays: OpeningPeriod; saturday?: OpeningPeriod; sunday?: OpeningPeriod };
 };
 
@@ -31,7 +31,7 @@ export const stores: Store[] = [
   { name: "Paraíso", cnpj: "11.588.752/0011-03", cep: "04005-003", street: "Rua Abílio Soares", number: "775", city: "São Paulo", state: "SP", lat: -23.5760422, lng: -46.6486672, whatsapp: "5511910358189", photo: "/fotos/lojas/paraiso.webp", hours: { weekdays: ["09:00", "18:30"], saturday: ["09:30", "13:30"] } },
   { name: "Indianópolis", cnpj: "11.588.752/0014-56", cep: "04089-002", street: "Alameda dos Maracatins", number: "1100", city: "São Paulo", state: "SP", lat: -23.6096219, lng: -46.6634809, whatsapp: "5511993635397", phone: "551147858825", photo: "/fotos/lojas/indianopolis.webp", hours: { weekdays: ["09:00", "19:00"], saturday: ["09:00", "18:00"] } },
   { name: "Santo André", cnpj: "11.588.752/0018-80", cep: "09040-160", street: "Av. Ramiro Colleoni", number: "103", city: "Santo André", state: "SP", lat: -23.6610283, lng: -46.5295920, whatsapp: "5511939413109", phone: "551146155138", photo: "/fotos/lojas/santo-andre.webp", hours: { weekdays: ["09:00", "18:30"], saturday: ["09:30", "13:30"] } },
-  { name: "Guarulhos 3", cnpj: "11.588.752/0007-27", cep: "07031-009", street: "Av. Guarulhos", number: "1388", city: "Guarulhos", state: "SP", lat: -23.5042832, lng: -46.5520945, whatsapp: "5511939038457", phone: "551146154997", photo: "/fotos/lojas/guarulhos-3.webp" },
+  { name: "Guarulhos 3", cnpj: "11.588.752/0007-27", cep: "07031-009", street: "Av. Guarulhos", number: "1388", city: "Guarulhos", state: "SP", lat: -23.5042832, lng: -46.5520945, whatsapp: "5511939038457", phone: "551146154997", photo: "/fotos/lojas/guarulhos-3.webp", hours: { weekdays: ["09:00", "18:30"], saturday: ["09:30", "13:30"] } },
   { name: "Osasco", cnpj: "11.588.752/0009-99", cep: "06016-004", street: "Av. Dona Primitiva Vianco", number: "578", city: "Osasco", state: "SP", lat: -23.5334036, lng: -46.7755525, hours: { weekdays: ["09:00", "18:00"], saturday: ["09:00", "17:00"] } },
 ];
 
