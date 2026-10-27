@@ -21,8 +21,8 @@ const benefits: Array<{ icon: IconName; title: string; text: string }> = [
 ];
 
 const themes = [
-  { label: "Meninos", text: "Temas infantis", image: "/fotos/temas/meninos.webp", href: "/departamentos/festas-tematicas" },
-  { label: "Meninas", text: "Temas infantis", image: "/fotos/temas/meninas.webp", href: "/departamentos/festas-tematicas" },
+  { label: "Meninos", text: "Temas infantis", image: "/fotos/temas/festa-safari.webp", href: "/departamentos/festas-tematicas" },
+  { label: "Meninas", text: "Temas infantis", image: "/fotos/temas/festa-unicornio.webp", href: "/departamentos/festas-tematicas" },
   { label: "Doces", text: "Para a mesa da festa", image: "/fotos/temas/docinhos.webp", href: "/departamentos/confeitaria" },
   { label: "Confeitaria", text: "Bolos e cupcakes", image: "/fotos/temas/cupcakes.webp", href: "/departamentos/confeitaria" },
 ];
@@ -60,8 +60,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hero-collage" role="img" aria-label="Mesas de festa montadas com produtos Impakto: tema infantil, doces e confeitaria">
-            <img className="hero-photo hero-photo-main" src="/fotos/temas/meninas.webp" alt="" width={640} height={522} fetchPriority="high" decoding="async" />
+          <div className="hero-collage" role="img" aria-label="Mesas de festa decoradas: tema unicórnio, docinhos e cupcakes">
+            <img className="hero-photo hero-photo-main" src="/fotos/temas/festa-unicornio.webp" alt="" width={640} height={522} fetchPriority="high" decoding="async" />
             <img className="hero-photo hero-photo-top" src="/fotos/temas/docinhos.webp" alt="" width={640} height={522} decoding="async" />
             <img className="hero-photo hero-photo-bottom" src="/fotos/temas/cupcakes.webp" alt="" width={640} height={522} decoding="async" />
             <span className="hero-sticker" aria-hidden="true"><strong>5% OFF</strong>na 1ª compra</span>
@@ -85,7 +85,7 @@ export default function Home() {
 
       <section className="themes-section section" aria-labelledby="temas-title">
         <div className="container">
-          <div className="section-title"><div><span className="kicker">Inspiração</span><h2 id="temas-title">Festas que a gente monta todo dia</h2></div></div>
+          <div className="section-title"><div><span className="kicker">Inspiração</span><h2 id="temas-title">Ideias para cada tipo de festa</h2></div></div>
           <ul className="theme-grid">
             {themes.map((theme) => (
               <li key={theme.label}>
