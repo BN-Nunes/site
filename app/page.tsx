@@ -23,8 +23,8 @@ const benefits: Array<{ icon: IconName; title: string; text: string }> = [
 const themes = [
   { label: "Meninos", text: "Temas infantis", image: "/fotos/temas/meninos.webp", href: "/departamentos/festas-tematicas" },
   { label: "Meninas", text: "Temas infantis", image: "/fotos/temas/meninas.webp", href: "/departamentos/festas-tematicas" },
-  { label: "Doces", text: "Para a mesa da festa", image: "/fotos/temas/doces.webp", href: "/departamentos/confeitaria" },
-  { label: "Confeitaria", text: "Bolos e cupcakes", image: "/fotos/temas/confeitaria.webp", href: "/departamentos/confeitaria" },
+  { label: "Doces", text: "Para a mesa da festa", image: "/fotos/temas/docinhos.webp", href: "/departamentos/confeitaria" },
+  { label: "Confeitaria", text: "Bolos e cupcakes", image: "/fotos/temas/cupcakes.webp", href: "/departamentos/confeitaria" },
 ];
 
 const steps = [
@@ -62,8 +62,8 @@ export default function Home() {
 
           <div className="hero-collage" role="img" aria-label="Mesas de festa montadas com produtos Impakto: tema infantil, doces e confeitaria">
             <img className="hero-photo hero-photo-main" src="/fotos/temas/meninas.webp" alt="" width={640} height={522} fetchPriority="high" decoding="async" />
-            <img className="hero-photo hero-photo-top" src="/fotos/temas/doces.webp" alt="" width={640} height={522} decoding="async" />
-            <img className="hero-photo hero-photo-bottom" src="/fotos/temas/confeitaria.webp" alt="" width={640} height={522} decoding="async" />
+            <img className="hero-photo hero-photo-top" src="/fotos/temas/docinhos.webp" alt="" width={640} height={522} decoding="async" />
+            <img className="hero-photo hero-photo-bottom" src="/fotos/temas/cupcakes.webp" alt="" width={640} height={522} decoding="async" />
             <span className="hero-sticker" aria-hidden="true"><strong>5% OFF</strong>na 1ª compra</span>
           </div>
         </div>

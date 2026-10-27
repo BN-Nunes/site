@@ -263,6 +263,13 @@ test("every store photo points to a file in public/fotos/lojas", async () => {
   }
 });
 
+test("every photo on the homepage exists in public/fotos", async () => {
+  const { html } = await render("/");
+  const photos = [...new Set([...html.matchAll(/src="(\/fotos\/[^"]+)"/g)].map((match) => match[1]))];
+  assert.ok(photos.length > 0);
+  for (const photo of photos) await access(new URL(`../public${photo}`, import.meta.url));
+});
+
 test("store WhatsApp numbers are valid São Paulo mobiles and never shared between stores", () => {
   const numbers = stores.filter((store) => store.whatsapp).map((store) => store.whatsapp);
   const withoutWhatsapp = stores.filter((store) => !store.whatsapp).map((store) => store.name);
