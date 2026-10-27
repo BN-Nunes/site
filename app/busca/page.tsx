@@ -8,6 +8,7 @@ import { departments as staticDepartments } from "../departamentos/departments";
 import { getDepartmentsWithLiveProducts } from "../lib/products-source.server";
 import { searchCatalog } from "../lib/search";
 import { siteContacts } from "../lib/site-contacts";
+import { stores } from "../lojas/stores";
 
 type SearchPageProps = {
   searchParams: Promise<{ q?: string | string[] }>;
@@ -50,7 +51,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {wantsStores && (
             <Link className="search-stores-shortcut" href="/lojas">
               <span aria-hidden="true"><Icon name="store" size={26} /></span>
-              <div><strong>Procurando uma loja?</strong><small>Veja endereços e rotas das nossas 13 filiais.</small></div>
+              <div><strong>Procurando uma loja?</strong><small>Veja endereços e rotas das nossas {stores.length} filiais.</small></div>
               <Icon name="arrowRight" />
             </Link>
           )}

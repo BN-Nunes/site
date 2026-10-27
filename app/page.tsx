@@ -29,12 +29,12 @@ const themes = [
 
 const steps = [
   { title: "Escolha os produtos", text: "Navegue pelos departamentos e adicione ao carrinho de orçamento o que precisar." },
-  { title: "Selecione uma filial", text: "Diga qual das nossas 13 lojas deve atender você." },
+  { title: "Selecione uma filial", text: `Diga qual das nossas ${stores.length} lojas deve atender você.` },
   { title: "Receba pelo WhatsApp", text: "A filial confirma preços, estoque e condições direto com você." },
 ];
 
 const storePhotos = [
-  { src: "/fotos/lojas/tatuape.webp", name: "Tatuapé" },
+  { src: "/fotos/lojas/indianopolis.webp", name: "Indianópolis" },
   { src: "/fotos/lojas/alphaville.webp", name: "Alphaville" },
   { src: "/fotos/lojas/santo-andre.webp", name: "Santo André" },
 ];
@@ -53,7 +53,7 @@ export default function Home() {
           <div className="hero-copy">
             <span className="eyebrow">Realizando sonhos</span>
             <h1>A festa começa na <BrandWord />.</h1>
-            <p>Balões, temas, confeitaria, descartáveis e decoração em 13 lojas em São Paulo — e orçamento rápido pelo WhatsApp.</p>
+            <p>Balões, temas, confeitaria, descartáveis e decoração em {stores.length} lojas em São Paulo — e orçamento rápido pelo WhatsApp.</p>
             <div className="hero-actions">
               <a className="button button-cta" href="#categorias">Explorar departamentos <Icon name="arrowRight" size={18} /></a>
               <Link className="text-link" href="/lojas">Encontrar uma loja</Link>
@@ -138,7 +138,7 @@ export default function Home() {
         <div className="container store-locator-card">
           <div className="store-locator-copy">
             <span className="kicker">Visite a Impakto</span>
-            <h2 id="store-locator-title">13 lojas cheias de ideias para a sua festa.</h2>
+            <h2 id="store-locator-title">{stores.length} lojas cheias de ideias para a sua festa.</h2>
             <p>Em {storeCities.slice(0, -1).join(", ")} e {storeCities.at(-1)}. Veja a rota, chame no WhatsApp ou ligue direto para a loja.</p>
             <Link className="button store-locator-button" href="/lojas">Encontre a loja mais próxima <Icon name="arrowRight" size={18} /></Link>
           </div>

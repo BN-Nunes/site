@@ -5,6 +5,7 @@ import { MainNav, type NavItem } from "./MainNav";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { departments } from "./departamentos/departments";
+import { stores } from "./lojas/stores";
 
 const navItems: NavItem[] = [
   ...departments.map((department) => ({
@@ -24,7 +25,7 @@ export function SiteHeader() {
         <i aria-hidden="true" />
         <span>5% OFF na primeira compra</span>
         <i aria-hidden="true" />
-        <span>13 lojas em São Paulo</span>
+        <span>{stores.length} lojas em São Paulo</span>
       </div>
 
       <header className="site-header">

@@ -1,7 +1,7 @@
 # Impakto Festas — site
 
 Catálogo de artigos para festas da Impakto Festas. O cliente monta um
-**carrinho de orçamento**, escolhe uma das 13 filiais e envia a lista pelo
+**carrinho de orçamento**, escolhe uma das filiais e envia a lista pelo
 **WhatsApp** — o site não vende nem processa pagamentos.
 
 Produção: https://impakto-festas.vercel.app
@@ -55,7 +55,7 @@ Veja `.env.example`. Resumo:
 - `app/departamentos/` — dados dos departamentos, página de departamento e card de produto.
 - `app/busca/` — página de resultados; a lógica de busca está em `app/lib/search.ts`.
 - `app/carrinho/` — carrinho de orçamento e montagem da mensagem (`app/lib/quote-message.ts`).
-- `app/lojas/` — lista de filiais (`stores.ts`) com filtro e ordenação por distância.
+- `app/lojas/` — lista de filiais (`stores.ts`) com filtro e ordenação por distância. O número de lojas nas páginas sai dessa lista; a única exceção é `public/og-festas.png` (prévia de compartilhamento), que tem o número escrito na imagem e precisa ser refeita quando uma loja abre ou fecha.
 - `app/lib/site-contacts.ts` — telefones, WhatsApp, e-mail e endereço: altere aqui, não nas páginas.
 - `supabase/migrations/` — SQL das tabelas; aplique manualmente no SQL Editor do Supabase.
 

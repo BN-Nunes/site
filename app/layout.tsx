@@ -6,6 +6,7 @@ import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { WhatsAppFloat } from "./WhatsAppFloat";
 import { getSiteUrl } from "./lib/site-config";
+import { stores } from "./lojas/stores";
 import "@fontsource-variable/baloo-2";
 import "@fontsource-variable/nunito";
 import "./globals.css";
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     siteName: "Impakto Festas",
-    images: [{ url: image, width: 1200, height: 630, alt: "Impakto Festas — Realizando sonhos. Tudo para a sua festa em 13 lojas em São Paulo." }],
+    images: [{ url: image, width: 1200, height: 630, alt: `Impakto Festas — Realizando sonhos. Tudo para a sua festa em ${stores.length} lojas em São Paulo.` }],
   },
   twitter: {
     card: "summary_large_image",

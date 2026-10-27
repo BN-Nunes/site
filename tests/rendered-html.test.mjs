@@ -158,8 +158,17 @@ test("cart quantity is clamped between 1 and 99", () => {
   assert.equal(clampQuantity(Number.NaN), 1);
 });
 
-test("cookie consent controls functional persistence", async () => {
+test("cookie consent controls functional persistence", async (t) => {
   const store = new Map();
+  // Browser stubs must not outlive this test: the server bundle treats a global `window` as "running in the browser".
+  const stubbed = ["window", "localStorage", "dispatchEvent", "CustomEvent"];
+  const originals = new Map(stubbed.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
+  t.after(() => {
+    for (const [key, descriptor] of originals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
   globalThis.window = globalThis;
   globalThis.localStorage = {
     getItem: (key) => (store.has(key) ? store.get(key) : null),
@@ -219,12 +228,12 @@ test("sortByDistance ranks the closest store first within a city-filtered subset
   const guarulhosStores = stores.filter((store) => store.city === "Guarulhos");
   assert.ok(guarulhosStores.length > 1, "expected more than one Guarulhos store to filter among");
 
-  const guarulhos2 = guarulhosStores.find((store) => store.name === "Guarulhos 2");
-  const sorted = sortByDistance(guarulhosStores, { lat: guarulhos2.lat, lng: guarulhos2.lng });
+  const guarulhos3 = guarulhosStores.find((store) => store.name === "Guarulhos 3");
+  const sorted = sortByDistance(guarulhosStores, { lat: guarulhos3.lat, lng: guarulhos3.lng });
 
   // The globally nearest store to this origin may be outside Guarulhos, but within
-  // the filtered subset the nearest must still be Guarulhos 2 itself (distance ~0).
-  assert.equal(sorted[0].name, "Guarulhos 2");
+  // the filtered subset the nearest must still be Guarulhos 3 itself (distance ~0).
+  assert.equal(sorted[0].name, "Guarulhos 3");
   assert.ok(sorted[0].distanceKm < 0.001);
 });
 
@@ -239,8 +248,8 @@ test("every department icon is a fixed local image, except ofertas' literal perc
   }
 });
 
-test("all 13 stores have plausible São Paulo-area coordinates", () => {
-  assert.equal(stores.length, 13);
+test("all 11 stores have plausible São Paulo-area coordinates", () => {
+  assert.equal(stores.length, 11);
   for (const store of stores) {
     assert.ok(store.lat < -22 && store.lat > -25, `${store.name} latitude out of range: ${store.lat}`);
     assert.ok(store.lng < -45 && store.lng > -48, `${store.name} longitude out of range: ${store.lng}`);
@@ -256,9 +265,19 @@ test("every store photo points to a file in public/fotos/lojas", async () => {
 
 test("store WhatsApp numbers are valid São Paulo mobiles and never shared between stores", () => {
   const numbers = stores.filter((store) => store.whatsapp).map((store) => store.whatsapp);
-  assert.ok(numbers.length >= 12, "expected the stores listed on impaktofestas.com.br to have their own WhatsApp");
+  const withoutWhatsapp = stores.filter((store) => !store.whatsapp).map((store) => store.name);
+  assert.deepEqual(withoutWhatsapp, ["Osasco"], "only Osasco (not on impaktofestas.com.br) should fall back to the central number");
   for (const number of numbers) assert.match(number, /^55119\d{8}$/);
   assert.equal(new Set(numbers).size, numbers.length);
+});
+
+test("pages show the real store count instead of a hard-coded one", async () => {
+  for (const path of ["/", "/busca?q=balao"]) {
+    const { html } = await render(path);
+    const counts = [...html.matchAll(/(\d+)(?:<!-- -->)? (?:lojas|filiais)\b/g)].map((match) => Number(match[1]));
+    assert.ok(counts.length > 0, `${path} should mention the number of stores`);
+    for (const count of counts) assert.equal(count, stores.length, `${path} mentions ${count} stores`);
+  }
 });
 
 test("store WhatsApp link names the store and falls back to the central number", () => {

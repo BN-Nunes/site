@@ -3,6 +3,7 @@ import { FooterMap } from "./FooterMap";
 import { Icon } from "./Icon";
 import { ManageCookiesLink } from "./ManageCookiesLink";
 import { siteContacts } from "./lib/site-contacts";
+import { stores } from "./lojas/stores";
 
 const whatsapp = siteContacts.whatsapp.baseUrl;
 
@@ -13,7 +14,7 @@ export function SiteFooter() {
       <div className="festa-stripe" aria-hidden="true" />
       <div className="container footer-brand">
         <Link className="footer-brand-logo" href="/" aria-label="Impakto Festas — página inicial"><img src="/impakto-logo.png" alt="" width={1056} height={321} loading="lazy" decoding="async" /></Link>
-        <p><strong>Realizando sonhos</strong> em cada festa, em 13 lojas e pelo WhatsApp.</p>
+        <p><strong>Realizando sonhos</strong> em cada festa, em {stores.length} lojas e pelo WhatsApp.</p>
       </div>
       <div className="container footer-contact-grid">
         <section className="footer-contact-card" aria-labelledby="footer-sac">
