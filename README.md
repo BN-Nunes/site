@@ -20,7 +20,7 @@ Tudo vem do logo da Impakto Festas e da fachada das lojas ("Realizando sonhos"):
 - **Cores** (tokens `--c-*` em `app/globals.css`): amarelo `#FCCC0C`, magenta `#CC1884`, verde `#00843C`, roxo `#3C1890`, vermelho `#F01E2C`. O magenta é a cor de ação (botões); o roxo escuro `--brand-deep` é a base de barras e rodapé.
 - **Tipografia**: Baloo 2 (títulos, arredondada como as letras-balão do logo) e Nunito (texto), self-hosted via `@fontsource-variable`.
 - **Grafismo**: as "pílulas" diagonais com anéis da identidade, em `public/brand/pills.svg` e `public/brand/pills-stripe.svg`.
-- **Fotos**: fachadas e mesas temáticas de `impaktofestas.com.br`, otimizadas em `public/fotos/`.
+- **Fotos** (otimizadas em `public/fotos/`): as mesas temáticas de meninos e meninas e parte das fachadas vêm de `impaktofestas.com.br`; as fachadas de Perdizes, Indianópolis e Cotia foram enviadas pela equipe. As fotos de doces (Vidal Balielo Jr.) e confeitaria (Ferawan) são do Pexels, cuja licença permite uso comercial sem crédito.
 
 ## Rodando localmente
 
