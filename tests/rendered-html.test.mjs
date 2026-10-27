@@ -247,6 +247,13 @@ test("all 13 stores have plausible São Paulo-area coordinates", () => {
   }
 });
 
+test("every store photo points to a file in public/fotos/lojas", async () => {
+  for (const store of stores.filter((store) => store.photo)) {
+    assert.match(store.photo, /^\/fotos\/lojas\/[\w-]+\.webp$/);
+    await access(new URL(`../public${store.photo}`, import.meta.url));
+  }
+});
+
 test("store WhatsApp numbers are valid São Paulo mobiles and never shared between stores", () => {
   const numbers = stores.filter((store) => store.whatsapp).map((store) => store.whatsapp);
   assert.ok(numbers.length >= 12, "expected the stores listed on impaktofestas.com.br to have their own WhatsApp");

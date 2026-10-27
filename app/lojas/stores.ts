@@ -12,7 +12,7 @@ export type Store = {
   whatsapp?: string;
   /** Telefone fixo em E.164 sem símbolos, mesma fonte do WhatsApp. */
   phone?: string;
-  /** Foto da fachada (de impaktofestas.com.br/institucional/nossas-lojas), quando houver. */
+  /** Foto da fachada (do site oficial ou enviada pela equipe da loja), quando houver. */
   photo?: string;
 };
 
@@ -24,7 +24,7 @@ export const stores: Store[] = [
   { name: "Morumbi", cnpj: "11.588.752/0008-08", cep: "05640-004", street: "Av. Dr. Guilherme Dumont Villares", number: "2031", city: "São Paulo", state: "SP", lat: -23.6232826, lng: -46.7375340, whatsapp: "5511913727297", phone: "551146155061" },
   { name: "Perdizes", cnpj: "11.588.752/0012-94", cep: "05013-001", street: "Rua Cardoso de Almeida", number: "859", city: "São Paulo", state: "SP", lat: -23.5383571, lng: -46.6684487, whatsapp: "5511913727315", phone: "551146155132", photo: "/fotos/lojas/perdizes.webp" },
   { name: "Paraíso", cnpj: "11.588.752/0011-03", cep: "04005-003", street: "Rua Abílio Soares", number: "775", city: "São Paulo", state: "SP", lat: -23.5760422, lng: -46.6486672, whatsapp: "5511910358189", photo: "/fotos/lojas/paraiso.webp" },
-  { name: "Moema 2", cnpj: "11.588.752/0014-56", cep: "04089-002", street: "Alameda dos Maracatins", number: "1100", city: "São Paulo", state: "SP", lat: -23.6096219, lng: -46.6634809, whatsapp: "5511993635397", phone: "551147858825" },
+  { name: "Indianópolis", cnpj: "11.588.752/0014-56", cep: "04089-002", street: "Alameda dos Maracatins", number: "1100", city: "São Paulo", state: "SP", lat: -23.6096219, lng: -46.6634809, whatsapp: "5511993635397", phone: "551147858825", photo: "/fotos/lojas/indianopolis.webp" },
   { name: "Guarulhos 2", cnpj: "11.588.752/0015-37", cep: "07191-000", street: "Av. Otávio Braga de Mesquita", number: "1443", city: "Guarulhos", state: "SP", lat: -23.4525869, lng: -46.5088542, whatsapp: "5511993633153", phone: "551124429358", photo: "/fotos/lojas/guarulhos-2.webp" },
   { name: "Tatuapé", cnpj: "11.588.752/0017-07", cep: "03308-000", street: "Av. Azevedo", number: "471", city: "São Paulo", state: "SP", lat: -23.5436239, lng: -46.5703564, whatsapp: "5511939427206", phone: "551146155144", photo: "/fotos/lojas/tatuape.webp" },
   { name: "Santo André", cnpj: "11.588.752/0018-80", cep: "09040-160", street: "Av. Ramiro Colleoni", number: "103", city: "Santo André", state: "SP", lat: -23.6610283, lng: -46.5295920, whatsapp: "5511939413109", phone: "551146155138", photo: "/fotos/lojas/santo-andre.webp" },
