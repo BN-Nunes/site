@@ -3,10 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { departments, getDepartment } from "../departments";
 import { DepartmentHeroArt } from "../DepartmentHeroArt";
+import { DepartmentSearch } from "../DepartmentSearch";
 import { ProductCard } from "../ProductCard";
+import { ProductsPager } from "../ProductsPager";
 import { Icon } from "../../Icon";
 import { JsonLd } from "../../JsonLd";
 import { ScrollReveal } from "../../ScrollReveal";
+import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../../lib/department-listing";
+import { readQueryParam } from "../../lib/search";
 import { canonicalUrl } from "../../lib/site-config";
 import { siteContacts } from "../../lib/site-contacts";
 import { breadcrumbJsonLd, productJsonLd } from "../../lib/structured-data";
@@ -14,36 +18,49 @@ import { getDepartmentsWithLiveProducts } from "../../lib/products-source.server
 
 type DepartmentPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ busca?: string | string[]; pagina?: string | string[] }>;
 };
+
+const GRID_ID = "produtos";
 
 export function generateStaticParams() {
   return departments.map((department) => ({ slug: department.slug }));
 }
 
-export async function generateMetadata({ params }: DepartmentPageProps): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params, searchParams }: DepartmentPageProps): Promise<Metadata> {
+  const [{ slug }, { busca, pagina }] = await Promise.all([params, searchParams]);
   const department = getDepartment(slug);
   if (!department) return {};
-  return {
-    title: `${department.name} | Impakto Festas`,
-    description: department.description,
-    alternates: { canonical: canonicalUrl(`/departamentos/${department.slug}`) },
-  };
+
+  const query = readQueryParam(busca);
+  const metadata: Metadata = { title: `${department.name} | Impakto Festas`, description: department.description };
+  // Resultados de busca ficam fora do Google. Já as páginas de "carregar mais" ficam, cada uma com o
+  // próprio endereço, para que o Google encontre todos os produtos e não só os primeiros.
+  if (query) {
+    return { ...metadata, alternates: { canonical: canonicalUrl(departmentListingHref(slug, "")) }, robots: { index: false, follow: true } };
+  }
+  const liveDepartment = (await getDepartmentsWithLiveProducts()).find((candidate) => candidate.slug === slug);
+  const { page } = listDepartmentProducts(liveDepartment?.products ?? [], "", readPageParam(pagina));
+  return { ...metadata, alternates: { canonical: canonicalUrl(departmentListingHref(slug, "", page)) } };
 }
 
-export default async function DepartmentPage({ params }: DepartmentPageProps) {
-  const { slug } = await params;
+export default async function DepartmentPage({ params, searchParams }: DepartmentPageProps) {
+  const [{ slug }, { busca, pagina }] = await Promise.all([params, searchParams]);
   const liveDepartments = await getDepartmentsWithLiveProducts();
   const department = liveDepartments.find((candidate) => candidate.slug === slug);
   if (!department) notFound();
 
   const productCount = department.products.length;
+  const query = readQueryParam(busca);
+  const listing = listDepartmentProducts(department.products, query, readPageParam(pagina));
+  // Com poucos produtos, todos cabem na tela e a busca só atrapalharia.
+  const showSearch = productCount > PRODUCTS_PER_PAGE || query !== "";
   const otherDepartments = liveDepartments.filter((candidate) => candidate.slug !== department.slug);
 
   return (
     <main className="department-main" id="conteudo">
       <JsonLd data={breadcrumbJsonLd([{ name: "Departamentos", path: "/#categorias" }, { name: department.name, path: `/departamentos/${department.slug}` }])} />
-      {department.products.map((product) => <JsonLd key={product.id} data={productJsonLd(product, department)} />)}
+      {listing.products.map((product) => <JsonLd key={product.id} data={productJsonLd(product, department)} />)}
 
       <section className={`department-hero ${department.className}`}>
         <div className="container department-hero-grid">
@@ -68,10 +85,41 @@ export default async function DepartmentPage({ params }: DepartmentPageProps) {
             {productCount > 0 && <span className="products-count">{productCount} {productCount === 1 ? "produto" : "produtos"}</span>}
           </div>
 
-          {productCount > 0 ? (
-            <div className="products-grid" data-reveal>
-              <ScrollReveal selector=".product-card" />
-              {department.products.map((product) => <ProductCard key={product.id} product={product} department={department} />)}
+          {showSearch && (
+            <div className="department-search">
+              <DepartmentSearch action={departmentListingHref(slug, "")} departmentName={department.name} query={query} />
+              <p className="department-search-status" role="status">
+                {listing.searching && (
+                  <>
+                    {listing.matching === 0 ? "Nenhum produto encontrado" : `${listing.matching} ${listing.matching === 1 ? "produto encontrado" : "produtos encontrados"}`} para <strong>“{query}”</strong>.{" "}
+                    <Link className="text-link" href={departmentListingHref(slug, "")} scroll={false}>Limpar busca</Link>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
+          {listing.products.length > 0 ? (
+            <>
+              <div className="products-grid" id={GRID_ID} data-reveal>
+                <ScrollReveal selector=".product-card" />
+                {listing.products.map((product) => <ProductCard key={product.id} product={product} department={department} />)}
+              </div>
+              {listing.matching > PRODUCTS_PER_PAGE && (
+                <ProductsPager
+                  gridId={GRID_ID}
+                  shown={listing.products.length}
+                  total={listing.matching}
+                  nextHref={listing.nextPage ? departmentListingHref(slug, query, listing.nextPage) : null}
+                />
+              )}
+            </>
+          ) : productCount > 0 ? (
+            <div className="search-empty department-search-empty">
+              <span aria-hidden="true"><Icon name="search" size={30} /></span>
+              <h3>Não achamos esse produto em {department.name}.</h3>
+              <p>Confira se a palavra está escrita certo ou tente um termo mais curto. O produto também pode estar em outro departamento.</p>
+              <Link className="text-link" href={`/busca?q=${encodeURIComponent(query)}`}>Buscar “{query}” em todo o site</Link>
             </div>
           ) : (
             <div className="products-empty">

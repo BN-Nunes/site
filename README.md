@@ -52,7 +52,7 @@ Veja `.env.example`. Resumo:
 ## Onde fica cada coisa
 
 - `app/layout.tsx` — header (`SiteHeader`), footer (`SiteFooter`), botão flutuante do WhatsApp e aviso de cookies, compartilhados por todas as páginas.
-- `app/departamentos/` — dados dos departamentos, página de departamento e card de produto.
+- `app/departamentos/` — dados dos departamentos, página de departamento e card de produto. A página mostra 24 produtos por vez (`?pagina=2` soma os 24 seguintes, pelo botão "Carregar mais produtos") e, quando o departamento tem mais de 24, um campo de busca só dele (`?busca=`); a lógica fica em `app/lib/department-listing.ts`. Foto que não existe no servidor de fotos (o CloudFront responde 403) vira o ícone do departamento no card e o ícone padrão no carrinho (`ProductPhoto.tsx`).
 - `app/busca/` — página de resultados; a lógica de busca está em `app/lib/search.ts`.
 - `app/carrinho/` — carrinho de orçamento e montagem da mensagem (`app/lib/quote-message.ts`).
 - `app/lojas/` — lista de filiais (`stores.ts`) com filtro e ordenação por distância, e uma página por loja (`/lojas/[slug]`, com horário, mapa, contatos e lojas próximas). O horário (`hours`) foi copiado da ficha de cada loja no Google Maps em 27/10/2026 (o de Guarulhos 3, que não tem ficha, foi enviado pela equipe); lojas sem `hours` simplesmente não mostram horário. O endereço da página sai do nome da loja (`storeSlug`), então renomear uma loja muda o link dela. O número de lojas nas páginas sai dessa lista; a única exceção é `public/og-festas.png` (prévia de compartilhamento), que tem o número escrito na imagem e precisa ser refeita quando uma loja abre ou fecha.

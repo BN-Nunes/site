@@ -6,7 +6,7 @@ import { SearchBar } from "../SearchBar";
 import { ProductCard } from "../departamentos/ProductCard";
 import { departments as staticDepartments } from "../departamentos/departments";
 import { getDepartmentsWithLiveProducts } from "../lib/products-source.server";
-import { searchCatalog } from "../lib/search";
+import { readQueryParam, searchCatalog } from "../lib/search";
 import { siteContacts } from "../lib/site-contacts";
 import { stores } from "../lojas/stores";
 
@@ -14,15 +14,8 @@ type SearchPageProps = {
   searchParams: Promise<{ q?: string | string[] }>;
 };
 
-const MAX_QUERY_LENGTH = 80;
-
-function readQuery(value: string | string[] | undefined): string {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return (raw ?? "").trim().slice(0, MAX_QUERY_LENGTH);
-}
-
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const query = readQuery((await searchParams).q);
+  const query = readQueryParam((await searchParams).q);
   return {
     title: query ? `Busca: ${query} | Impakto Festas` : "Buscar produtos | Impakto Festas",
     robots: { index: false, follow: true },
@@ -30,7 +23,7 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = readQuery((await searchParams).q);
+  const query = readQueryParam((await searchParams).q);
   const catalog = query ? await getDepartmentsWithLiveProducts() : staticDepartments;
   const { wantsStores, departments, products } = searchCatalog(query, catalog);
   const hasResults = wantsStores || departments.length > 0 || products.length > 0;

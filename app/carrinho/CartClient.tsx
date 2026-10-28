@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useCart } from "../CartContext";
+import { ProductPhoto } from "../departamentos/ProductPhoto";
 import { Icon } from "../Icon";
 import { stores } from "../lojas/stores";
 import { getSupabaseBrowserClient } from "../supabase-client";
@@ -89,7 +90,7 @@ export function CartClient() {
         <ul className="quote-item-list">
           {items.map((item) => (
             <li className="quote-item" key={item.id}>
-              <div className="quote-item-image">{item.image ? <img src={item.image} alt="" width={600} height={600} loading="lazy" decoding="async" /> : <Icon name="sparkles" size={28} />}</div>
+              <div className="quote-item-image">{item.image ? <ProductPhoto src={item.image} alt="" fallback={<Icon name="sparkles" size={28} />} /> : <Icon name="sparkles" size={28} />}</div>
               <div className="quote-item-copy"><small>{item.department}</small><h3>{item.name}</h3>{item.sku && <p>Código: {item.sku}</p>}</div>
               <div className="quote-quantity" role="group" aria-label={`Quantidade de ${item.name}`}>
                 <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= MIN_QUANTITY} aria-label="Diminuir quantidade">−</button>

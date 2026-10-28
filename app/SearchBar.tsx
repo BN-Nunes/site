@@ -1,4 +1,5 @@
 import { Icon } from "./Icon";
+import { MAX_QUERY_LENGTH } from "./lib/search";
 
 /**
  * Formulário GET simples para /busca: funciona mesmo antes do JavaScript
@@ -16,7 +17,7 @@ export function SearchBar({ defaultValue = "", id = "busca" }: { defaultValue?: 
         placeholder="O que você está procurando?"
         autoComplete="off"
         enterKeyHint="search"
-        maxLength={80}
+        maxLength={MAX_QUERY_LENGTH}
         required
       />
       <button type="submit" aria-label="Buscar"><Icon name="search" size={22} /></button>

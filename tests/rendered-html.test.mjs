@@ -8,6 +8,7 @@ import { serializeJsonLd } from "../app/lib/json-ld.ts";
 import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
 import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
+import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../app/lib/department-listing.ts";
 import { departments } from "../app/departamentos/departments.ts";
 import { getStore, storeHoursRows, storeSlug, stores } from "../app/lojas/stores.ts";
 import { formatPhoneNumber, storeMapEmbedUrl, storeMapsUrl, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
@@ -452,6 +453,98 @@ test("mapCsvRowsToDepartments matches department names loosely, skips bad rows, 
   assert.deepEqual(confeitaria.products, [{ id: "confeitaria-sem-preco", sku: undefined, name: "Sem preço", description: "", price: "", image: "", available: true }]);
   // Descartáveis não apareceu na planilha: mantém o catálogo estático como fallback.
   assert.deepEqual(descartaveis.products, departments.find((department) => department.slug === "descartaveis").products);
+});
+
+function catalogProduct(index, name) {
+  return { id: `decoracao-${index}`, sku: String(100000 + index), name, description: "", price: "", image: "", available: true };
+}
+
+test("the department listing shows 24 products at a time, and its search filters by name or code", () => {
+  const products = Array.from({ length: 60 }, (_, index) => catalogProduct(index, index % 3 === 0 ? `CACHEPOT VERDE ${index}` : `FITA CETIM AZUL ${index}`));
+
+  const first = listDepartmentProducts(products, "", 1);
+  assert.equal(PRODUCTS_PER_PAGE, 24);
+  assert.deepEqual([first.products.length, first.matching, first.searching, first.page, first.nextPage], [24, 60, false, 1, 2]);
+  // "Carregar mais" soma as páginas: a página 2 mostra os 48 primeiros, na ordem da planilha.
+  assert.deepEqual(listDepartmentProducts(products, "", 2).products, products.slice(0, 48));
+  const last = listDepartmentProducts(products, "", 3);
+  assert.deepEqual([last.products.length, last.nextPage], [60, null]);
+  // Uma página além da última mostra a última.
+  assert.equal(listDepartmentProducts(products, "", 99).page, 3);
+
+  const green = listDepartmentProducts(products, "  cachepots   verdes ", 1);
+  assert.deepEqual([green.matching, green.searching, green.nextPage], [20, true, null]);
+  assert.ok(green.products.every((product) => product.name.startsWith("CACHEPOT VERDE")));
+  assert.deepEqual(listDepartmentProducts(products, "100007", 1).products.map((product) => product.sku), ["100007"]);
+  assert.equal(listDepartmentProducts(products, "balão", 1).matching, 0);
+  // Só palavras vazias (de, para…) não filtram nada.
+  assert.deepEqual([listDepartmentProducts(products, "de", 1).searching, listDepartmentProducts(products, "de", 1).matching], [false, 60]);
+
+  for (const value of [undefined, "", "0", "-2", "1.5", "abc", []]) assert.equal(readPageParam(value), 1, `pagina=${JSON.stringify(value)}`);
+  assert.equal(readPageParam("3"), 3);
+  assert.equal(readPageParam(["2", "5"]), 2);
+
+  assert.equal(departmentListingHref("decoracao", ""), "/departamentos/decoracao");
+  assert.equal(departmentListingHref("decoracao", "", 1), "/departamentos/decoracao");
+  assert.equal(departmentListingHref("decoracao", "fita azul", 2), "/departamentos/decoracao?busca=fita+azul&pagina=2");
+});
+
+test("department pages load products 24 at a time, search within the department and keep photos server-rendered", async (t) => {
+  const rows = Array.from({ length: 60 }, (_, index) => `${100000 + index},${index % 3 === 0 ? "CACHEPOT VERDE" : "FITA CETIM AZUL"} ${index},Decoração,https://fotos.example/pr${100000 + index}.webp`);
+  const original = process.env.PRODUCTS_CSV_URL;
+  t.after(() => { if (original === undefined) delete process.env.PRODUCTS_CSV_URL; else process.env.PRODUCTS_CSV_URL = original; });
+  process.env.PRODUCTS_CSV_URL = `data:text/csv;charset=utf-8,${encodeURIComponent(["CÓDIGO,DESCRIÇÃO,DEPARTAMENTO,URL IMAGEM", ...rows].join("\n"))}`;
+
+  const cards = (html) => html.match(/<article class="product-card">/g)?.length ?? 0;
+  const canonical = (html) => html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+
+  const first = (await render("/departamentos/decoracao")).html.replaceAll("<!-- -->", "");
+  assert.equal(cards(first), 24);
+  assert.equal(first.match(/"@type":"Product"/g)?.length, 24, "only the products on screen get Product JSON-LD");
+  assert.match(first, /<img src="https:\/\/fotos\.example\/pr100000\.webp" alt="CACHEPOT VERDE 0"/);
+  assert.match(first, /<form[^>]*role="search"[^>]*action="\/departamentos\/decoracao"/);
+  assert.match(first, /name="busca"/);
+  assert.match(first, /Mostrando 24 de 60 produtos/);
+  assert.match(first, /href="\/departamentos\/decoracao\?pagina=2"/);
+  assert.equal(canonical(first), "https://impakto-festas.vercel.app/departamentos/decoracao");
+  assert.doesNotMatch(first, /noindex/);
+
+  const second = (await render("/departamentos/decoracao?pagina=2")).html.replaceAll("<!-- -->", "");
+  assert.equal(cards(second), 48);
+  assert.match(second, /href="\/departamentos\/decoracao\?pagina=3"/);
+  assert.equal(canonical(second), "https://impakto-festas.vercel.app/departamentos/decoracao?pagina=2");
+
+  for (const path of ["/departamentos/decoracao?pagina=3", "/departamentos/decoracao?pagina=99"]) {
+    const { status, html } = await render(path);
+    assert.equal(status, 200);
+    assert.equal(cards(html), 60, path);
+    assert.match(html.replaceAll("<!-- -->", ""), /Mostrando 60 de 60 produtos/);
+    assert.doesNotMatch(html, /Carregar mais produtos/);
+    assert.equal(canonical(html), "https://impakto-festas.vercel.app/departamentos/decoracao?pagina=3");
+  }
+
+  const green = (await render("/departamentos/decoracao?busca=cachepot+verde")).html.replaceAll("<!-- -->", "");
+  assert.equal(cards(green), 20);
+  assert.match(green, /20 produtos encontrados para <strong>“cachepot verde”<\/strong>/);
+  assert.match(green, /value="cachepot verde"/);
+  assert.match(green, /href="\/departamentos\/decoracao"[^>]*>Limpar busca/);
+  assert.doesNotMatch(green, /Carregar mais produtos/);
+  assert.match(green, /<meta name="robots" content="noindex, ?follow"/);
+  assert.equal(canonical(green), "https://impakto-festas.vercel.app/departamentos/decoracao");
+
+  const blue = (await render("/departamentos/decoracao?busca=azul&pagina=1")).html.replaceAll("<!-- -->", "");
+  assert.equal(cards(blue), 24);
+  assert.match(blue, /href="\/departamentos\/decoracao\?busca=azul&amp;pagina=2"/);
+
+  const none = (await render("/departamentos/decoracao?busca=bal%C3%A3o")).html.replaceAll("<!-- -->", "");
+  assert.equal(cards(none), 0);
+  assert.match(none, /Nenhum produto encontrado para <strong>“balão”<\/strong>/);
+  assert.match(none, /href="\/busca\?q=bal%C3%A3o"/);
+
+  // Departamento com poucos produtos (os 2 de exemplo): sem busca e sem "carregar mais".
+  const small = (await render("/departamentos/confeitaria")).html;
+  assert.equal(cards(small), 2);
+  assert.doesNotMatch(small, /name="busca"|Mostrando \d+ de/);
 });
 
 test("no private key appears in the client bundle", async () => {

@@ -15,6 +15,15 @@ const STOP_WORDS = new Set(["de", "da", "do", "das", "dos", "para", "pra", "com"
 
 const STORE_QUERY = /\b(loja|lojas|filial|filiais|endereco|enderecos|unidade|unidades)\b/;
 
+/** Tamanho máximo de uma busca, igual ao `maxLength` dos campos. */
+export const MAX_QUERY_LENGTH = 80;
+
+/** Lê uma busca da URL (`?q=`, `?busca=`): só o primeiro valor, sem espaços nas pontas e com tamanho limitado. */
+export function readQueryParam(value: string | string[] | undefined): string {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return (raw ?? "").trim().slice(0, MAX_QUERY_LENGTH);
+}
+
 export function normalize(value: string): string {
   return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR").trim();
 }
@@ -46,10 +55,16 @@ export function departmentScore(department: Department, normalizedQuery: string)
   ]);
 }
 
-function productScore(product: Product, department: Department, terms: string[]): number {
-  return scoreFields(terms, [
+function productFields(product: Product): Array<{ value: string; weight: number }> {
+  return [
     { value: `${product.name} ${product.sku ?? ""}`, weight: 10 },
     { value: product.description, weight: 4 },
+  ];
+}
+
+function productScore(product: Product, department: Department, terms: string[]): number {
+  return scoreFields(terms, [
+    ...productFields(product),
     // Um produto de "Descartáveis" é relevante para "copos" mesmo que o nome não cite copos.
     { value: `${department.name} ${departmentAliases[department.slug]?.join(" ") ?? ""} ${department.productTypes.join(" ")}`, weight: 3 },
   ]);
@@ -81,4 +96,19 @@ export function searchCatalog(query: string, departments: Department[]): Catalog
     .map(({ product, department }) => ({ product, department }));
 
   return { wantsStores: STORE_QUERY.test(normalizedQuery), departments: matchedDepartments, products };
+}
+
+/**
+ * Busca dentro de um departamento, mais relevantes primeiro. Só nome, código e descrição
+ * contam: os termos do próprio departamento casariam com todos os produtos dele.
+ * Sem termos úteis na busca, devolve `null` (nada a filtrar).
+ */
+export function searchProducts(products: Product[], query: string): Product[] | null {
+  const terms = searchTerms(normalize(query));
+  if (terms.length === 0) return null;
+  return products
+    .map((product) => ({ product, score: scoreFields(terms, productFields(product)) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || Number(b.product.available) - Number(a.product.available))
+    .map((entry) => entry.product);
 }
