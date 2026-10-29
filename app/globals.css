@@ -701,6 +701,17 @@ html[data-theme="dark"] .store-page-info,html[data-theme="dark"] .store-nearby-c
 .footer-brand p{margin:0;color:#e6ddfb;font-size:16px}
 .footer-brand strong{color:var(--c-yellow);font-family:var(--font-display);font-size:22px;font-weight:800}
 @media (max-width:640px){.footer-brand{flex-direction:column;align-items:flex-start;gap:14px}.footer-brand-logo img{width:160px}}
+/* Footer on phones: everything centered, one block under the other */
+@media (max-width:640px){
+  .footer-brand,.footer-contact-card,.footer-secondary section,.footer-bottom{text-align:center}
+  .footer-brand,.footer-bottom,.footer-link-list{align-items:center}
+  .footer-contact-title,.footer-contact-card p,.footer-contact-card address{justify-content:center}
+  .footer-highlight,.footer-email,.footer-social-link,.footer-brand-promo>a:first-of-type{margin-left:auto;margin-right:auto}
+  /* Ícone em cima: ao lado de um endereço de 3 linhas centralizado, ele ficaria solto. */
+  .footer-contact-card address{flex-direction:column;align-items:center;gap:4px}
+  .footer-brand-promo{text-align:center}
+  .footer-link-list button{text-align:center}
+}
 html[data-theme="dark"] .footer{background:#150c33}
 /* Department search and "carregar mais": the search sits between the title and the grid; the pager closes the grid */
 .department-search{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;margin:-6px 0 24px}
