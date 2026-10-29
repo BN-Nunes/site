@@ -104,6 +104,28 @@ test("the search page lists matching products from the catalog", async () => {
   assert.match(html, /noindex/);
 });
 
+test("the search page shows 24 results at a time, with the same \"carregar mais\" as departments", async () => {
+  const cards = (html) => html.match(/<article class="product-card">/g)?.length ?? 0;
+  const page = async (path) => (await render(path)).html.replaceAll("<!-- -->", "");
+
+  const first = await page("/busca?q=bal%C3%A3o");
+  const total = Number(first.match(/(\d+) produtos encontrados/)?.[1]);
+  assert.ok(total > 2 * PRODUCTS_PER_PAGE, `expected more than two pages of balloons, got ${total}`);
+  assert.equal(cards(first), PRODUCTS_PER_PAGE);
+  assert.match(first, new RegExp(`Mostrando 24 de ${total} produtos`));
+  assert.match(first, /href="\/busca\?q=bal%C3%A3o&amp;pagina=2"/);
+
+  assert.equal(cards(await page("/busca?q=bal%C3%A3o&pagina=2")), 48);
+  const last = await page("/busca?q=bal%C3%A3o&pagina=99");
+  assert.equal(cards(last), total);
+  assert.doesNotMatch(last, /Carregar mais produtos/);
+
+  // Poucos resultados: sem "Mostrando…".
+  const few = await page("/busca?q=sanduicheira");
+  assert.ok(cards(few) > 0 && cards(few) <= PRODUCTS_PER_PAGE);
+  assert.doesNotMatch(few, /Mostrando \d+ de/);
+});
+
 test('searching for "copos" finds the disposables department and its products', () => {
   const result = searchCatalog("copos", departments);
   assert.equal(result.departments[0].slug, "descartaveis");

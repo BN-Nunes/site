@@ -4,15 +4,25 @@ import { Icon } from "../Icon";
 import { ScrollReveal } from "../ScrollReveal";
 import { SearchBar } from "../SearchBar";
 import { ProductCard } from "../departamentos/ProductCard";
+import { ProductsPager } from "../departamentos/ProductsPager";
 import { departments as staticDepartments } from "../departamentos/departments";
+import { paginate, PRODUCTS_PER_PAGE, readPageParam } from "../lib/department-listing";
 import { getDepartmentsWithLiveProducts } from "../lib/products-source.server";
 import { readQueryParam, searchCatalog } from "../lib/search";
 import { siteContacts } from "../lib/site-contacts";
 import { stores } from "../lojas/stores";
 
 type SearchPageProps = {
-  searchParams: Promise<{ q?: string | string[] }>;
+  searchParams: Promise<{ q?: string | string[]; pagina?: string | string[] }>;
 };
+
+const GRID_ID = "resultados";
+
+function searchPageHref(query: string, page: number): string {
+  const params = new URLSearchParams({ q: query });
+  if (page > 1) params.set("pagina", String(page));
+  return `/busca?${params}`;
+}
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const query = readQueryParam((await searchParams).q);
@@ -23,9 +33,11 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = readQueryParam((await searchParams).q);
+  const params = await searchParams;
+  const query = readQueryParam(params.q);
   const catalog = query ? await getDepartmentsWithLiveProducts() : staticDepartments;
   const { wantsStores, departments, products } = searchCatalog(query, catalog);
+  const shown = paginate(products, readPageParam(params.pagina));
   const hasResults = wantsStores || departments.length > 0 || products.length > 0;
 
   return (
@@ -63,10 +75,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {products.length > 0 && (
             <div className="search-products">
               <h2>Produtos</h2>
-              <div className="products-grid" data-reveal>
+              <div className="products-grid" id={GRID_ID} data-reveal>
                 <ScrollReveal selector=".product-card" />
-                {products.map(({ product, department }) => <ProductCard key={product.id} product={product} department={department} showDepartment />)}
+                {shown.items.map(({ product, department }) => <ProductCard key={product.id} product={product} department={department} showDepartment />)}
               </div>
+              {products.length > PRODUCTS_PER_PAGE && (
+                <ProductsPager gridId={GRID_ID} shown={shown.items.length} total={products.length} nextHref={shown.nextPage ? searchPageHref(query, shown.nextPage) : null} />
+              )}
             </div>
           )}
 

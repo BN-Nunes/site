@@ -22,19 +22,19 @@ export function readPageParam(value: string | string[] | undefined): number {
   return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
+/** Os itens das páginas 1 até a pedida, que nunca passa da última. */
+export function paginate<T>(items: T[], requestedPage: number): { items: T[]; page: number; nextPage: number | null } {
+  const lastPage = Math.max(1, Math.ceil(items.length / PRODUCTS_PER_PAGE));
+  const page = Math.min(requestedPage, lastPage);
+  return { items: items.slice(0, page * PRODUCTS_PER_PAGE), page, nextPage: page < lastPage ? page + 1 : null };
+}
+
 /** Filtra os produtos do departamento pela busca e corta até a página pedida (que nunca passa da última). */
 export function listDepartmentProducts(products: Product[], query: string, requestedPage: number): DepartmentListing {
   const found = searchProducts(products, query);
   const matches = found ?? products;
-  const lastPage = Math.max(1, Math.ceil(matches.length / PRODUCTS_PER_PAGE));
-  const page = Math.min(requestedPage, lastPage);
-  return {
-    products: matches.slice(0, page * PRODUCTS_PER_PAGE),
-    matching: matches.length,
-    searching: found !== null,
-    page,
-    nextPage: page < lastPage ? page + 1 : null,
-  };
+  const { items, page, nextPage } = paginate(matches, requestedPage);
+  return { products: items, matching: matches.length, searching: found !== null, page, nextPage };
 }
 
 /** Endereço do departamento com a busca e a página, sem parâmetros vazios. */
