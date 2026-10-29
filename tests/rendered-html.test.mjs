@@ -9,6 +9,7 @@ import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/li
 import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments, mergeCatalogRows, withDescriptions, withoutCodes } from "../app/lib/product-catalog.ts";
 import { hiddenProductCodes } from "../app/departamentos/hidden-products.ts";
+import { productSearchFromPath } from "../app/lib/not-found.ts";
 import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../app/lib/department-listing.ts";
 import { findProduct, isDemoProduct, productPath, similarProducts } from "../app/lib/product-page.ts";
 import { departments } from "../app/departamentos/departments.ts";
@@ -86,6 +87,26 @@ test("an unknown department returns 404", async () => {
 test("an unknown store returns 404", async () => {
   const { status } = await render("/lojas/loja-que-nao-existe");
   assert.equal(status, 404);
+});
+
+test("the 404 page offers a search and every department, and a removed product's link suggests a search by its name", async () => {
+  assert.equal(productSearchFromPath("/produtos/caneta-decoracao-ponta-fina-cores-05-un-207827"), "caneta decoracao ponta");
+  assert.equal(productSearchFromPath("/produtos/toalha-de-mesa-lisa-amarelo-01-un-x-1-40-x-2-20-cm-204522"), "toalha mesa lisa");
+  assert.equal(productSearchFromPath("/produtos/po-p-decoracao-perola-01-un-x-10-gr-207867"), "decoracao perola");
+  assert.equal(productSearchFromPath("/produtos/%E0%A4%A"), "");
+  assert.equal(productSearchFromPath("/lojas/loja-que-nao-existe"), null);
+
+  const missing = await render("/pagina-que-nao-existe");
+  assert.equal(missing.status, 404);
+  assert.match(missing.html, /<h1 id="not-found-title">Página não encontrada<\/h1>/);
+  assert.match(missing.html, /<meta content="noindex" name="robots"\/>/);
+  assert.match(missing.html, /<form class="search" role="search" action="\/busca" method="get"><label class="sr-only" for="busca-404">/);
+  for (const department of departments) assert.ok(missing.html.includes(`href="/departamentos/${department.slug}"`), `links to ${department.slug}`);
+
+  const removed = await render("/produtos/caneta-decoracao-ponta-fina-cores-05-un-207827");
+  assert.equal(removed.status, 404);
+  assert.match(removed.html, /<h1 id="not-found-title">Este produto não está mais no site<\/h1>/);
+  assert.match(removed.html, /id="busca-404"[^>]*value="caneta decoracao ponta"/);
 });
 
 test("every page shares the same header (search, cart, nav) and footer", async () => {

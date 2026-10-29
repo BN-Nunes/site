@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Icon } from "./Icon";
+import { departments } from "./departamentos/departments";
+import { NotFoundMessage } from "./NotFoundMessage";
 import { siteContacts } from "./lib/site-contacts";
 
 export const metadata: Metadata = {
@@ -11,17 +12,29 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <main className="section not-found-main" id="conteudo">
-      <div className="container">
-        <section className="stores-empty not-found-card" aria-labelledby="not-found-title">
-          <span aria-hidden="true"><Icon name="sparkles" size={40} /></span>
-          <h1 id="not-found-title">Página não encontrada</h1>
-          <p>O endereço que você tentou acessar não existe ou foi movido. Use a busca acima, explore nossos departamentos ou encontre uma loja perto de você.</p>
-          <div className="hero-actions not-found-actions">
-            <Link className="button button-cta" href="/#categorias">Ver departamentos</Link>
-            <Link className="text-link" href="/lojas">Nossas lojas</Link>
-            <a className="text-link" href={siteContacts.whatsapp.baseUrl} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a>
-          </div>
+      <div className="container not-found">
+        {/* O 404 nas cores das letras do logo. */}
+        <p className="not-found-code" aria-hidden="true"><span>4</span><span>0</span><span>4</span></p>
+        <NotFoundMessage />
+
+        <section className="not-found-departments" aria-labelledby="not-found-departments-title">
+          <h2 id="not-found-departments-title">Ou escolha um departamento</h2>
+          <ul className="related-departments-list">
+            {departments.map((department) => (
+              <li key={department.slug}>
+                <Link className={`related-department ${department.className}`} href={`/departamentos/${department.slug}`}>
+                  <span aria-hidden="true">{department.slug === "ofertas" ? department.icon : <img src={department.icon} alt="" width={40} height={40} loading="lazy" decoding="async" />}</span>
+                  <strong>{department.name}</strong>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
+
+        <p className="not-found-help">
+          Precisa de ajuda? <Link className="text-link" href="/lojas">Encontre uma loja</Link> ou{" "}
+          <a className="text-link" href={siteContacts.whatsapp.baseUrl} target="_blank" rel="noreferrer">fale com a gente pelo WhatsApp</a>.
+        </p>
       </div>
     </main>
   );
