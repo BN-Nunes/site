@@ -17,6 +17,7 @@ import { systemProductRows } from "../app/departamentos/system-products.ts";
 import { getStore, storeHoursRows, storeSlug, stores } from "../app/lojas/stores.ts";
 import { formatPhoneNumber, storeMapEmbedUrl, storeMapsUrl, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
 import { buildQuoteEvent } from "../app/lib/quote-events.ts";
+import { whatsappLinkWithMessage } from "../app/lib/site-contacts.ts";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -629,8 +630,11 @@ test("the system export's products fill their departments, and the sheet wins wh
   assert.match(html, new RegExp(`Mostrando 24 de ${balloons.length} produtos`));
   assert.ok(html.includes(`src="${balloons[0].imagem}"`));
   assert.doesNotMatch(html, /Buquê de Balões Coloridos/);
-  // Ofertas não tem família no sistema: continua com os produtos de exemplo.
-  assert.match((await render("/departamentos/ofertas")).html, /Combo Festa Colorida/);
+  // Ofertas não tem família no sistema nem produtos de exemplo: fica vazio e manda pedir as ofertas da semana pelo WhatsApp.
+  const offers = (await render("/departamentos/ofertas")).html.replaceAll("<!-- -->", "");
+  assert.equal(offers.match(/<article class="product-card">/g), null);
+  assert.match(offers, /As ofertas da semana são passadas pelo WhatsApp\./);
+  assert.ok(offers.includes(`href="${whatsappLinkWithMessage("Olá! Quero saber as ofertas da semana.").replaceAll("&", "&amp;")}"`));
 });
 
 test("product pages are addressed by name and code, an old name still finds the product, and similar products come from the name", () => {
@@ -684,16 +688,18 @@ test("a product page shows the product, redirects an old name, and every card an
   assert.ok(renamed.headers.get("location").endsWith(path));
   assert.equal((await render("/produtos/produto-que-nao-existe-000000")).status, 404);
 
-  // Os produtos de exemplo (Ofertas) têm página, mas fora do Google.
-  const demo = catalog.find((department) => department.slug === "ofertas").products[0];
-  assert.match((await render(productPath(demo))).html, /<meta name="robots" content="noindex, ?follow"/);
+  // Os produtos de exemplo de departments.ts não aparecem: todo departamento tem produtos do sistema, menos Ofertas, que fica vazio.
+  const demos = departments.flatMap((department) => department.products);
+  assert.ok(catalog.every((department) => department.products.every((candidate) => !isDemoProduct(candidate))));
+  assert.equal((await render(productPath(demos[0]))).status, 404);
+  assert.equal((await render("/produtos/combo-festa-colorida-ofe-001")).status, 404);
 
   assert.ok((await render("/departamentos/festas-tematicas")).html.includes(`href="${productPath(themed.products[0])}"`), "cards link to the product page");
 
   const sitemap = await render("/sitemap.xml");
   assert.equal(sitemap.status, 200);
   assert.ok(sitemap.html.includes(`<loc>https://impakto-festas.vercel.app${path}</loc>`));
-  assert.ok(!sitemap.html.includes(productPath(demo)), "demo products stay out of the sitemap");
+  assert.ok(demos.every((candidate) => !sitemap.html.includes(productPath(candidate))), "demo products stay out of the sitemap");
   const realProducts = new Set(catalog.flatMap((department) => department.products.filter((candidate) => !isDemoProduct(candidate)).map(productPath)));
   assert.equal(sitemap.html.match(/<loc>[^<]*\/produtos\//g)?.length, realProducts.size);
 });

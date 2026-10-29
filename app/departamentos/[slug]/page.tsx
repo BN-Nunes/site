@@ -12,7 +12,7 @@ import { ScrollReveal } from "../../ScrollReveal";
 import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../../lib/department-listing";
 import { readQueryParam } from "../../lib/search";
 import { canonicalUrl } from "../../lib/site-config";
-import { siteContacts } from "../../lib/site-contacts";
+import { siteContacts, whatsappLinkWithMessage } from "../../lib/site-contacts";
 import { breadcrumbJsonLd, productJsonLd } from "../../lib/structured-data";
 import { getDepartmentsWithLiveProducts } from "../../lib/products-source.server";
 
@@ -56,6 +56,10 @@ export default async function DepartmentPage({ params, searchParams }: Departmen
   // Com poucos produtos, todos cabem na tela e a busca só atrapalharia.
   const showSearch = productCount > PRODUCTS_PER_PAGE || query !== "";
   const otherDepartments = liveDepartments.filter((candidate) => candidate.slug !== department.slug);
+  // Ofertas fica vazio enquanto a planilha não traz ofertas: as da semana são passadas pelo WhatsApp, como no card da home.
+  const empty = department.slug === "ofertas"
+    ? { label: "Ofertas da semana", title: "As ofertas da semana são passadas pelo WhatsApp.", text: "Fale com a nossa equipe: o percentual e as condições são confirmados pela filial no atendimento.", action: "Pedir pelo WhatsApp", href: whatsappLinkWithMessage("Olá! Quero saber as ofertas da semana.") }
+    : { label: "Catálogo em atualização", title: "Estamos atualizando os produtos deste departamento.", text: "Enquanto isso, nossa equipe consulta a disponibilidade para você pelo WhatsApp.", action: "Consultar pelo WhatsApp", href: siteContacts.whatsapp.baseUrl };
 
   return (
     <main className="department-main" id="conteudo">
@@ -126,8 +130,8 @@ export default async function DepartmentPage({ params, searchParams }: Departmen
               <div className="products-empty-icon" aria-hidden="true">
                 {department.slug === "ofertas" ? department.icon : <img src={department.icon} alt="" width={46} height={46} loading="lazy" decoding="async" />}
               </div>
-              <div><span>Catálogo em atualização</span><h3>Estamos atualizando os produtos deste departamento.</h3><p>Enquanto isso, nossa equipe consulta a disponibilidade para você pelo WhatsApp.</p></div>
-              <a href={siteContacts.whatsapp.baseUrl} target="_blank" rel="noreferrer">Consultar pelo WhatsApp <Icon name="arrowRight" size={16} /></a>
+              <div><span>{empty.label}</span><h3>{empty.title}</h3><p>{empty.text}</p></div>
+              <a href={empty.href} target="_blank" rel="noreferrer">{empty.action} <Icon name="arrowRight" size={16} /></a>
             </div>
           )}
 

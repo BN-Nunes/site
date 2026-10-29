@@ -47,7 +47,7 @@ Veja `.env.example`. Resumo:
 
 - `NEXT_PUBLIC_SITE_URL` — URL canônica (metadata, sitemap, Open Graph).
 - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — chave **pública** do Supabase, usada no navegador.
-- `PRODUCTS_CSV_URL` — planilha publicada como CSV com os produtos (colunas em `catalogo/modelo-catalogo.csv`). O site soma a ela os produtos com foto da exportação do sistema (`app/departamentos/system-products.ts`, gerado por `npm run photos:check -- exportacao.csv --site`, que escolhe o departamento pela FAMÍLIA); um código que está nos dois aparece uma vez, como está na planilha. Sem a planilha, ou se ela falhar, ficam só os do sistema; departamento sem nenhum produto mostra os de exemplo de `app/departamentos/departments.ts`.
+- `PRODUCTS_CSV_URL` — planilha publicada como CSV com os produtos (colunas em `catalogo/modelo-catalogo.csv`). O site soma a ela os produtos com foto da exportação do sistema (`app/departamentos/system-products.ts`, gerado por `npm run photos:check -- exportacao.csv --site`, que escolhe o departamento pela FAMÍLIA); um código que está nos dois aparece uma vez, como está na planilha. Sem a planilha, ou se ela falhar, ficam só os do sistema; departamento sem nenhum produto mostra os de exemplo de `app/departamentos/departments.ts`. Ofertas não tem exemplos: enquanto a planilha não trouxer produtos com DEPARTAMENTO "Ofertas", a página fica vazia e manda pedir as ofertas da semana pelo WhatsApp.
 - `SUPABASE_SERVICE_ROLE_KEY` — **secreta**, só para o script de importação. Nunca use prefixo `VITE_`.
 
 ## Onde fica cada coisa

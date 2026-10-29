@@ -109,10 +109,8 @@ export const departments: Department[] = [
     icon: "%",
     className: "offers",
     productTypes: ["Kits promocionais", "Últimas unidades", "Seleção da semana"],
-    products: [
-      { id: "oferta-kit-basico", sku: "OFE-001", name: "Combo Festa Colorida", description: "Seleção promocional demonstrativa com itens básicos para montar uma comemoração alegre.", price: "Preço sob consulta", image: "/products/ofertas-kit-basico.jpg", available: true },
-      { id: "oferta-kit-premium", sku: "OFE-002", name: "Combo Celebração Completa", description: "Conjunto demonstrativo com decoração e acessórios variados para uma festa mais completa.", price: "Preço sob consulta", image: "/products/ofertas-kit-premium.jpg", available: true },
-    ],
+    // Sem produtos de exemplo: até a planilha trazer ofertas, a página manda pedir as da semana pelo WhatsApp.
+    products: [],
   },
 ];
 
