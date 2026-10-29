@@ -16,12 +16,15 @@
 // Excel e para a coluna "URL IMAGEM" da planilha de produtos do site.
 //
 // Com --site, também regrava app/departamentos/system-products.ts com os produtos que
-// têm foto, no departamento do site que corresponde à FAMÍLIA (DEPARTMENT_BY_FAMILY).
-// Depois é só commitar e publicar.
-import { readFile, writeFile } from "node:fs/promises";
+// têm foto, no departamento do site que corresponde à FAMÍLIA (DEPARTMENT_BY_FAMILY), e
+// copia as fotos que só a loja antiga tem para public/fotos/produtos (em WebP), para o
+// site não depender dela: as já copiadas continuam no site mesmo com a loja antiga fora
+// do ar. Depois é só commitar e publicar.
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import sharp from "sharp";
 import { normalize } from "../app/lib/search.ts";
 
 const DEFAULT_PHOTO_URL = "https://dfm0yhok7o14r.cloudfront.net/produtos/800/pr{sku}.webp";
@@ -29,6 +32,7 @@ const OLD_STORE_SEARCH = "https://www.impaktofestas.com.br/api/catalog_system/pu
 const CONCURRENCY = 16;
 const ATTEMPTS = 3;
 const SITE_PRODUCTS_FILE = new URL("../app/departamentos/system-products.ts", import.meta.url);
+const SITE_PHOTOS_DIR = new URL("../public/fotos/produtos/", import.meta.url);
 
 // Departamento do site para cada família do sistema, pelo código no começo da coluna
 // FAMÍLIA ("057 BALÃO METALIZADO" → "057"). Família fora da lista não entra no site.
@@ -119,6 +123,24 @@ async function hasPhoto(url: string): Promise<Result> {
     await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
   }
   return "ERRO";
+}
+
+/** Baixa a foto e grava em WebP, com o fundo branco das outras fotos de lá (algumas são PNG transparente). */
+async function copyPhoto(url: string, file: URL): Promise<boolean> {
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
+      if (response.ok) {
+        const image = Buffer.from(await response.arrayBuffer());
+        await sharp(image).flatten({ background: "#ffffff" }).webp({ quality: 80 }).toFile(fileURLToPath(file));
+        return true;
+      }
+    } catch {
+      // Falha de rede ou imagem inválida: tenta de novo.
+    }
+    await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+  }
+  return false;
 }
 
 type VtexProduct = { productReference?: string; items?: Array<{ images?: Array<{ imageUrl: string }> }> };
@@ -213,36 +235,64 @@ if (values.site) {
   const familyColumn = header.findIndex((name) => normalize(name) === "familia");
   if (familyColumn === -1) throw new Error("--site precisa da coluna FAMÍLIA para escolher o departamento.");
   if (count("ERRO")) throw new Error(`${count("ERRO")} produtos deram erro no teste: rode de novo antes de atualizar o site, senão eles sairiam dele.`);
-  if (oldStoreError) throw new Error("A loja antiga não respondeu: rode de novo antes de atualizar o site, senão os produtos com foto só de lá sairiam dele.");
+  // Uma foto da loja antiga já copiada não é baixada de novo, e continua valendo quando a loja
+  // antiga não responde (ou depois que for desligada).
+  if (oldStoreError) console.warn("A loja antiga não respondeu: só as fotos de lá já copiadas para public/fotos/produtos entram no site.");
+  await mkdir(SITE_PHOTOS_DIR, { recursive: true });
+  const copied = new Set(await readdir(SITE_PHOTOS_DIR));
+  const used = new Set<string>();
+  const pending: Array<{ url: string; file: string }> = [];
   const nameColumn = header.findIndex((column) => normalize(column) === "nome");
   const unmapped = new Map<string, number>();
   const siteRows = rows.flatMap((row, index) => {
-    const image = mainPhoto(index);
-    if (!image) return [];
+    const sku = skuOf(row);
+    const file = `${sku}.webp`;
+    const onPhotoServer = results[index] === "SIM";
+    if (!onPhotoServer && !oldStore.has(sku) && !copied.has(file)) return [];
     const family = row[familyColumn]?.trim() ?? "";
     const department = DEPARTMENT_BY_FAMILY[family.match(/^\d+/)?.[0] ?? ""];
     if (!department) {
       unmapped.set(family, (unmapped.get(family) ?? 0) + 1);
       return [];
     }
-    const sku = skuOf(row);
     // Como os nomes já publicados: sem o ponto final nem o "Ean :789…" que alguns cadastros têm no fim.
     const name = (row[nameColumn] ?? "").replace(/\s*Ean\s*:\s*\d+\s*$/i, "").replace(/[.\s]+$/, "");
     if (!name) return [];
-    return [{ departamento: department, codigo: sku, nome: name, imagem: image }];
+    if (!onPhotoServer) {
+      used.add(file);
+      if (!copied.has(file)) pending.push({ url: mainPhoto(index), file });
+    }
+    return [{ departamento: department, codigo: sku, nome: name, imagem: onPhotoServer ? photoUrl(sku) : `/fotos/produtos/${file}` }];
   });
   siteRows.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { numeric: true }));
 
+  console.log(`\nCopiando ${pending.length} fotos da loja antiga para public/fotos/produtos (${used.size - pending.length} já estavam lá)…`);
+  const failed: string[] = [];
+  let nextCopy = 0;
+  await Promise.all(Array.from({ length: CONCURRENCY }, async () => {
+    while (nextCopy < pending.length) {
+      const { url, file } = pending[nextCopy++];
+      if (!(await copyPhoto(url, new URL(file, SITE_PHOTOS_DIR)))) failed.push(url);
+    }
+  }));
+  if (failed.length) throw new Error(`Não consegui copiar ${failed.length} fotos da loja antiga (${failed[0]}…): rode de novo antes de atualizar o site.`);
+
   await writeFile(SITE_PRODUCTS_FILE, [
     `// Gerado por \`npm run photos:check -- ${basename(inputPath)} --site\` em ${new Date().toLocaleDateString("pt-BR")}: os produtos`,
-    "// da exportação do sistema que têm foto (no servidor de fotos ou na loja antiga), já com o departamento",
-    "// do site. Não edite à mão: rode o script de novo com a exportação nova. Um código que também está na",
-    "// planilha (PRODUCTS_CSV_URL) aparece uma vez só, como está na planilha.",
+    "// da exportação do sistema que têm foto (no servidor de fotos, ou na loja antiga, copiada para",
+    "// public/fotos/produtos), já com o departamento do site. Não edite à mão: rode o script de novo com a",
+    "// exportação nova. Um código que também está na planilha (PRODUCTS_CSV_URL) aparece uma vez só, como",
+    "// está na planilha.",
     "export const systemProductRows: Record<string, string>[] = [",
     ...siteRows.map((row) => `  ${JSON.stringify(row)},`),
     "];",
     "",
   ].join("\n"), "utf8");
+
+  // Fotos de produtos que saíram do site, ou que ganharam foto no servidor de fotos.
+  const unused = [...copied].filter((file) => !used.has(file));
+  for (const file of unused) await rm(new URL(file, SITE_PHOTOS_DIR));
+  if (unused.length) console.log(`Apaguei ${unused.length} fotos de public/fotos/produtos que o site não usa mais.`);
 
   const byDepartment = new Map<string, number>();
   for (const row of siteRows) byDepartment.set(row.departamento, (byDepartment.get(row.departamento) ?? 0) + 1);

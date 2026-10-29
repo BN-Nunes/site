@@ -296,6 +296,17 @@ test("every store photo points to a file in public/fotos/lojas", async () => {
   }
 });
 
+test("system product photos come from the photo server or a file in public/fotos/produtos, never the old store", async () => {
+  const copied = new Set(await readdir(new URL("../public/fotos/produtos/", import.meta.url)));
+  const local = systemProductRows.filter((row) => !row.imagem.startsWith("https://dfm0yhok7o14r.cloudfront.net/"));
+  assert.ok(local.length > 500, `expected the old store's photos to be copied, got ${local.length}`);
+  for (const row of local) {
+    assert.equal(row.imagem, `/fotos/produtos/${row.codigo}.webp`);
+    assert.ok(copied.has(`${row.codigo}.webp`), `${row.imagem} is missing`);
+  }
+  assert.equal(copied.size, local.length, "public/fotos/produtos has photos no product uses");
+});
+
 test("every page links to the official Mercado Livre store, and the homepage has a section for it", async () => {
   const link = /<a href="https:\/\/www\.mercadolivre\.com\.br\/loja\/impakto-festas" target="_blank" rel="noreferrer">/;
   for (const path of ["/", "/lojas", "/carrinho"]) {
