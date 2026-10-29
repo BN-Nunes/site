@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
  * Foto do produto que dá lugar a `fallback` quando o arquivo não existe: o servidor de fotos
  * responde com erro e, sem isso, o navegador mostraria o ícone de imagem quebrada.
  */
-export function ProductPhoto({ src, alt, fallback }: { src: string; alt: string; fallback: ReactNode }) {
+export function ProductPhoto({ src, alt, fallback, priority = false }: { src: string; alt: string; fallback: ReactNode; priority?: boolean }) {
   const [failed, setFailed] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -18,5 +18,6 @@ export function ProductPhoto({ src, alt, fallback }: { src: string; alt: string;
   }, [src]);
 
   if (failed) return fallback;
-  return <img ref={imageRef} src={src} alt={alt} width={600} height={600} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+  // `priority`: a foto principal da página do produto, que aparece logo de cara.
+  return <img ref={imageRef} src={src} alt={alt} width={600} height={600} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} decoding="async" onError={() => setFailed(true)} />;
 }

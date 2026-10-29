@@ -3,7 +3,7 @@ import { normalize } from "./search.ts";
 
 const AVAILABLE_VALUES = new Set(["sim", "true", "1", "yes", "disponivel"]);
 
-function slugifyId(value: string): string {
+export function slugifyId(value: string): string {
   return normalize(value).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 

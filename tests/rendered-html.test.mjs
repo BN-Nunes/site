@@ -9,6 +9,7 @@ import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/li
 import { parseCsv } from "../app/lib/csv.ts";
 import { mapCsvRowsToDepartments, mergeCatalogRows } from "../app/lib/product-catalog.ts";
 import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../app/lib/department-listing.ts";
+import { findProduct, isDemoProduct, productPath, similarProducts } from "../app/lib/product-page.ts";
 import { departments } from "../app/departamentos/departments.ts";
 import { systemProductRows } from "../app/departamentos/system-products.ts";
 import { getStore, storeHoursRows, storeSlug, stores } from "../app/lojas/stores.ts";
@@ -35,7 +36,7 @@ async function render(path = "/") {
     },
   );
 
-  return { status: response.status, html: await response.text() };
+  return { status: response.status, headers: response.headers, html: await response.text() };
 }
 
 test("homepage renders the correct title and H1", async () => {
@@ -595,6 +596,71 @@ test("the system export's products fill their departments, and the sheet wins wh
   assert.doesNotMatch(html, /Buquê de Balões Coloridos/);
   // Ofertas não tem família no sistema: continua com os produtos de exemplo.
   assert.match((await render("/departamentos/ofertas")).html, /Combo Festa Colorida/);
+});
+
+test("product pages are addressed by name and code, an old name still finds the product, and similar products come from the name", () => {
+  const catalog = mapCsvRowsToDepartments([
+    { departamento: "Festas temáticas", codigo: "200625", nome: "FANTASIA INFANTIL PALHACO G. REF 23680" },
+    { departamento: "Festas temáticas", codigo: "200624", nome: "FANTASIA INFANTIL PALHACO M REF 23680" },
+    { departamento: "Festas temáticas", codigo: "200628", nome: "FANTASIA INFANTIL PIRATA VESTIDO G REF 23903" },
+    { departamento: "Festas temáticas", codigo: "244918", nome: "ABÓBORA 01 UN" },
+    { departamento: "Festas temáticas", codigo: "214239", nome: "LENCO CAIPIRA G 1 UN" },
+  ], departments);
+  const themed = catalog.find((department) => department.slug === "festas-tematicas");
+  const clown = themed.products[0];
+
+  assert.equal(productPath(clown), "/produtos/fantasia-infantil-palhaco-g-ref-23680-200625");
+  assert.deepEqual(findProduct(catalog, "fantasia-infantil-palhaco-g-ref-23680-200625"), { product: clown, department: themed, canonical: true });
+  // O nome mudou na planilha: o endereço antigo ainda acha o produto pelo código, para redirecionar.
+  assert.deepEqual(findProduct(catalog, "nome-antigo-200625"), { product: clown, department: themed, canonical: false });
+  assert.equal(findProduct(catalog, "palhaco-999999"), null);
+
+  // Primeiro o outro tamanho do mesmo item; "01 UN", números e tamanhos sozinhos não aproximam produtos.
+  assert.deepEqual(similarProducts(clown, themed).map((product) => product.sku), ["200624", "200628"]);
+  assert.deepEqual(similarProducts(themed.products[3], themed), []);
+
+  assert.equal(isDemoProduct(clown), false);
+  assert.equal(isDemoProduct(departments[0].products[0]), true);
+});
+
+test("a product page shows the product, redirects an old name, and every card and the sitemap link to it", async () => {
+  const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const catalog = mapCsvRowsToDepartments(systemProductRows, departments);
+  const themed = catalog.find((department) => department.slug === "festas-tematicas");
+  const product = themed.products.find((candidate) => candidate.name.startsWith("FANTASIA INFANTIL PALHACO"));
+  const path = productPath(product);
+
+  const { status, html } = await render(path);
+  const page = html.replaceAll("<!-- -->", "");
+  assert.equal(status, 200);
+  assert.match(page, new RegExp(`<h1>${escapeRegExp(product.name)}</h1>`));
+  assert.match(page, new RegExp(`Cód\\. <strong>${product.sku}</strong>`));
+  assert.match(page, new RegExp(`<link rel="canonical" href="https://impakto-festas.vercel.app${escapeRegExp(path)}"`));
+  assert.doesNotMatch(page, /noindex/);
+  assert.match(page, new RegExp(`<meta property="og:image" content="${escapeRegExp(product.image)}"`));
+  assert.match(page, /href="\/departamentos\/festas-tematicas"/);
+  assert.ok(page.includes(`text=${encodeURIComponent(`Olá! Quero saber mais sobre o produto ${product.sku}: ${product.name}.`)}`), "WhatsApp question names the product and its code");
+  assert.ok(page.includes(`"url":"https://impakto-festas.vercel.app${path}"`), "Product JSON-LD points at the page");
+  assert.match(page, /Opções parecidas/);
+  assert.equal(page.match(/<article class="product-card">/g)?.length, similarProducts(product, themed).length);
+
+  const renamed = await render(`/produtos/nome-antigo-${product.sku}`);
+  assert.equal(renamed.status, 308);
+  assert.ok(renamed.headers.get("location").endsWith(path));
+  assert.equal((await render("/produtos/produto-que-nao-existe-000000")).status, 404);
+
+  // Os produtos de exemplo (Ofertas) têm página, mas fora do Google.
+  const demo = catalog.find((department) => department.slug === "ofertas").products[0];
+  assert.match((await render(productPath(demo))).html, /<meta name="robots" content="noindex, ?follow"/);
+
+  assert.ok((await render("/departamentos/festas-tematicas")).html.includes(`href="${productPath(themed.products[0])}"`), "cards link to the product page");
+
+  const sitemap = await render("/sitemap.xml");
+  assert.equal(sitemap.status, 200);
+  assert.ok(sitemap.html.includes(`<loc>https://impakto-festas.vercel.app${path}</loc>`));
+  assert.ok(!sitemap.html.includes(productPath(demo)), "demo products stay out of the sitemap");
+  const realProducts = new Set(catalog.flatMap((department) => department.products.filter((candidate) => !isDemoProduct(candidate)).map(productPath)));
+  assert.equal(sitemap.html.match(/<loc>[^<]*\/produtos\//g)?.length, realProducts.size);
 });
 
 test("no private key appears in the client bundle", async () => {

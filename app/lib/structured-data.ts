@@ -1,5 +1,6 @@
 import type { Department, Product } from "../departamentos/departments";
 import { storeSlug, type OpeningPeriod, type Store } from "../lojas/stores";
+import { productPath } from "./product-page";
 import { getSiteUrl } from "./site-config";
 import { siteContacts } from "./site-contacts";
 import { storeMapsUrl } from "./store-contact";
@@ -82,6 +83,7 @@ export function productJsonLd(product: Product, department: Department) {
     "@type": "Product",
     name: product.name,
     description: product.description,
+    url: `${base}${productPath(product)}`,
     ...(product.sku ? { sku: product.sku } : {}),
     ...(image ? { image } : {}),
     category: department.name,

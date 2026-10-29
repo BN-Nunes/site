@@ -712,6 +712,37 @@ html[data-theme="dark"] .store-page-info,html[data-theme="dark"] .store-nearby-c
   .footer-brand-promo{text-align:center}
   .footer-link-list button{text-align:center}
 }
+/* Product page: photo on the left, name and actions on the right; one column on phones */
+.product-card-link{color:inherit}
+.product-card-link:hover{color:var(--brand)}
+.product-detail{padding-top:34px;background:var(--canvas)}
+.product-breadcrumb{flex-wrap:wrap;margin-bottom:26px}
+.product-breadcrumb strong{font-weight:800}
+.product-detail-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:56px}
+/* Fundo branco também no tema escuro: as fotos vêm com fundo branco. */
+.product-detail-image{position:relative;aspect-ratio:1/1;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:24px;background:#fff}
+/* Posicionada sobre a caixa: numa grade, height:100% não pega a altura dada pelo aspect-ratio e a foto vazaria. */
+.product-detail-image img:not(.product-image-placeholder){position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.product-detail-image .product-image-placeholder{width:96px;height:96px;opacity:.85}
+.product-detail-copy{display:flex;flex-direction:column;padding-top:6px}
+.product-detail-copy h1{margin:10px 0 14px;color:var(--ink);font-size:clamp(28px,3vw,40px);line-height:1.15;letter-spacing:-.01em}
+.product-detail-facts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;color:var(--muted);font-size:14px}
+.product-detail-facts strong{color:var(--ink)}
+.product-detail-facts .product-status{font-size:11px}
+.product-detail-price{margin-top:16px;color:var(--brand-deep);font-size:22px}
+.product-detail-description{margin:18px 0 0;color:var(--muted);font-size:16px;line-height:1.6}
+.product-detail-actions{display:grid;gap:12px;max-width:440px;margin-top:28px}
+.product-detail-actions .add-to-quote{min-height:54px;border-radius:14px;font-size:15px}
+.product-detail-question{min-height:52px;display:flex;align-items:center;justify-content:center;gap:10px;border:2px solid var(--green);border-radius:14px;color:var(--green);font-size:15px;font-weight:900;transition:.2s}
+.product-detail-question img{width:22px;height:22px}
+.product-detail-question:hover{background:var(--green);color:#fff}
+.product-detail-note{max-width:440px;margin:18px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+.product-detail-note a{color:var(--brand);font-weight:800}
+.product-similar{padding-top:0;background:var(--canvas)}
+.product-similar .department-products-title{align-items:flex-end}
+@media (max-width:800px){.product-detail-grid{grid-template-columns:1fr;gap:26px}.product-detail{padding-top:22px}.product-detail-actions,.product-detail-note{max-width:none}}
+/* No celular, a caixa da foto fica mais baixa (a foto inteira, com fundo branco dos lados) para o botão de orçamento aparecer mais cedo. */
+@media (max-width:700px){.product-detail-image{aspect-ratio:4/3}.product-detail-copy h1{font-size:26px}.product-similar .department-products-title{flex-direction:column;align-items:flex-start;gap:6px}}
 html[data-theme="dark"] .footer{background:#150c33}
 /* Department search and "carregar mais": the search sits between the title and the grid; the pager closes the grid */
 .department-search{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;margin:-6px 0 24px}

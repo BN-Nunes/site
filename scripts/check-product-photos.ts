@@ -1,6 +1,8 @@
-// Confere, SKU por SKU, quais produtos de uma exportação do sistema têm foto no
-// servidor de fotos. Faz só um HEAD por produto (não baixa a imagem): 200 = tem
-// foto; 403 ou 404 = não tem (o CloudFront responde 403 para arquivo que não existe).
+// Confere, SKU por SKU, quais produtos de uma exportação do sistema têm foto:
+// - no servidor de fotos: um HEAD por produto (não baixa a imagem); 200 = tem foto,
+//   403 ou 404 = não tem (o CloudFront responde 403 para arquivo que não existe);
+// - na loja antiga (impaktofestas.com.br, VTEX), pelo catálogo público dela: a foto de lá
+//   entra para quem não tem foto no servidor de fotos.
 //
 // Uso:
 //   npm run photos:check -- "C:/Users/Brenner/Desktop/rel111.csv"
@@ -9,8 +11,9 @@
 //
 // Lê o CSV como o sistema exporta (separado por ";", em Windows-1252 ou UTF-8) e
 // grava ao lado dele <nome>-fotos.csv com as mesmas colunas mais FOTO (SIM, NÃO ou
-// ERRO) e URL IMAGEM (só para quem tem foto), pronto para abrir no Excel e para a
-// coluna "URL IMAGEM" da planilha de produtos do site.
+// ERRO, no servidor de fotos), FOTO LOJA ANTIGA (SIM ou NÃO) e URL IMAGEM (a do
+// servidor de fotos, ou a da loja antiga quando só ela tem), pronto para abrir no
+// Excel e para a coluna "URL IMAGEM" da planilha de produtos do site.
 //
 // Com --site, também regrava app/departamentos/system-products.ts com os produtos que
 // têm foto, no departamento do site que corresponde à FAMÍLIA (DEPARTMENT_BY_FAMILY).
@@ -22,6 +25,7 @@ import { parseArgs } from "node:util";
 import { normalize } from "../app/lib/search.ts";
 
 const DEFAULT_PHOTO_URL = "https://dfm0yhok7o14r.cloudfront.net/produtos/800/pr{sku}.webp";
+const OLD_STORE_SEARCH = "https://www.impaktofestas.com.br/api/catalog_system/pub/products/search";
 const CONCURRENCY = 16;
 const ATTEMPTS = 3;
 const SITE_PRODUCTS_FILE = new URL("../app/departamentos/system-products.ts", import.meta.url);
@@ -92,6 +96,11 @@ function photoUrl(sku: string): string {
   return urlTemplate.replaceAll("{sku}", encodeURIComponent(/^\d+$/.test(sku) ? sku.padStart(6, "0") : sku));
 }
 
+// A loja antiga entrega a foto no tamanho pedido no endereço, quadrada e com fundo branco (sem cortar).
+function oldStoreImage(url: string, size: number): string {
+  return url.replace(/\/ids\/(\d+)(?:-\d+-\d+)?\//, `/ids/$1-${size}-${size}/`);
+}
+
 function toCsvField(value: string): string {
   return /[;"\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
@@ -112,6 +121,31 @@ async function hasPhoto(url: string): Promise<Result> {
   return "ERRO";
 }
 
+type VtexProduct = { productReference?: string; items?: Array<{ images?: Array<{ imageUrl: string }> }> };
+
+/**
+ * Primeira foto de cada produto da loja antiga, por código do sistema: a referência de lá é o nosso
+ * código com um 0 no fim (2295920 → 229592). Só a foto: a "marca" de lá é o fornecedor, a descrição
+ * são anotações internas ("ALPHA/MO/VL.M") e as outras fotos são a mesma reenviada.
+ */
+async function fetchOldStorePhotos(): Promise<Map<string, string>> {
+  const byCode = new Map<string, string>();
+  for (let from = 0; ; from += 50) {
+    // A busca da VTEX não passa do resultado 2.500; o catálogo tinha 2.090 produtos em 29/10/2026.
+    if (from >= 2500) { console.warn("A loja antiga tem mais de 2.500 produtos: só os 2.500 primeiros foram lidos."); break; }
+    const response = await fetch(`${OLD_STORE_SEARCH}?_from=${from}&_to=${from + 49}`, { signal: AbortSignal.timeout(30000) });
+    if (!response.ok) throw new Error(`a loja antiga respondeu ${response.status}`);
+    const page = (await response.json()) as VtexProduct[];
+    for (const product of page) {
+      const code = product.productReference?.match(/^(\d{6})0$/)?.[1];
+      const photo = product.items?.[0]?.images?.[0]?.imageUrl;
+      if (code && photo && !byCode.has(code)) byCode.set(code, photo);
+    }
+    if (page.length < 50) break;
+  }
+  return byCode;
+}
+
 const text = decode(await readFile(inputPath));
 const firstLine = text.slice(0, text.search(/\r?\n/));
 const delimiter = firstLine.split(";").length >= firstLine.split(",").length ? ";" : ",";
@@ -121,8 +155,21 @@ while (header.length && header.at(-1) === "") header.pop();
 
 const skuColumn = header.findIndex((name) => ["codigo", "sku"].includes(normalize(name)));
 if (skuColumn === -1) throw new Error(`Não achei a coluna CÓDIGO ou SKU. Colunas: ${header.join(", ")}`);
+const skuOf = (row: string[]) => row[skuColumn]?.trim() ?? "";
 
-console.log(`${rows.length} produtos em ${inputPath}. Testando ${urlTemplate}`);
+console.log(`${rows.length} produtos em ${inputPath}.`);
+console.log("Lendo o catálogo da loja antiga…");
+let oldStore = new Map<string, string>();
+let oldStoreError = "";
+try {
+  oldStore = await fetchOldStorePhotos();
+  console.log(`  ${oldStore.size} produtos da loja antiga com foto e código do sistema.`);
+} catch (error) {
+  oldStoreError = String(error);
+  console.warn(`  Não consegui ler a loja antiga (${oldStoreError}); sigo só com o servidor de fotos.`);
+}
+
+console.log(`Testando ${urlTemplate}`);
 const results: Result[] = new Array(rows.length);
 let next = 0;
 let done = 0;
@@ -131,7 +178,7 @@ const started = Date.now();
 async function worker() {
   while (next < rows.length) {
     const index = next++;
-    const sku = rows[index][skuColumn]?.trim() ?? "";
+    const sku = skuOf(rows[index]);
     results[index] = sku ? await hasPhoto(photoUrl(sku)) : "ERRO";
     if (++done % 1000 === 0 || done === rows.length) {
       const found = results.filter((result) => result === "SIM").length;
@@ -141,45 +188,56 @@ async function worker() {
 }
 await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
-const lines = [[...header, "FOTO", "URL IMAGEM"], ...rows.map((row, index) => {
-  const sku = row[skuColumn]?.trim() ?? "";
-  const url = results[index] === "SIM" ? photoUrl(sku) : "";
-  return [...header.map((_, column) => row[column] ?? ""), results[index], url];
+/** Foto do produto (card e página): a do servidor de fotos; sem ela, a primeira da loja antiga. */
+function mainPhoto(index: number): string {
+  const sku = skuOf(rows[index]);
+  if (results[index] === "SIM") return photoUrl(sku);
+  const oldStorePhoto = oldStore.get(sku);
+  return oldStorePhoto ? oldStoreImage(oldStorePhoto, 500) : "";
+}
+
+const lines = [[...header, "FOTO", "FOTO LOJA ANTIGA", "URL IMAGEM"], ...rows.map((row, index) => {
+  return [...header.map((_, column) => row[column] ?? ""), results[index], oldStore.has(skuOf(row)) ? "SIM" : "NÃO", mainPhoto(index)];
 })];
 const outputPath = inputPath.replace(/(\.csv)?$/i, "-fotos.csv");
 // BOM + ";" para o Excel em português abrir com acentos e colunas certas.
 await writeFile(outputPath, "\uFEFF" + lines.map((line) => line.map(toCsvField).join(";")).join("\r\n") + "\r\n", "utf8");
 
 const count = (result: Result) => results.filter((value) => value === result).length;
-console.log(`\nCom foto: ${count("SIM")}. Sem foto: ${count("NÃO")}. Erro (testar de novo): ${count("ERRO")}.`);
+const onlyOldStore = rows.filter((row, index) => results[index] !== "SIM" && oldStore.has(skuOf(row))).length;
+console.log(`\nCom foto no servidor de fotos: ${count("SIM")}. Só na loja antiga: ${onlyOldStore}. Erro (testar de novo): ${count("ERRO")}.`);
+console.log(`Sem foto em nenhum dos dois: ${rows.length - count("SIM") - onlyOldStore - count("ERRO")}.`);
 console.log(`Resultado em ${outputPath}`);
 
 if (values.site) {
   const familyColumn = header.findIndex((name) => normalize(name) === "familia");
   if (familyColumn === -1) throw new Error("--site precisa da coluna FAMÍLIA para escolher o departamento.");
   if (count("ERRO")) throw new Error(`${count("ERRO")} produtos deram erro no teste: rode de novo antes de atualizar o site, senão eles sairiam dele.`);
+  if (oldStoreError) throw new Error("A loja antiga não respondeu: rode de novo antes de atualizar o site, senão os produtos com foto só de lá sairiam dele.");
   const nameColumn = header.findIndex((column) => normalize(column) === "nome");
   const unmapped = new Map<string, number>();
   const siteRows = rows.flatMap((row, index) => {
-    if (results[index] !== "SIM") return [];
+    const image = mainPhoto(index);
+    if (!image) return [];
     const family = row[familyColumn]?.trim() ?? "";
     const department = DEPARTMENT_BY_FAMILY[family.match(/^\d+/)?.[0] ?? ""];
     if (!department) {
       unmapped.set(family, (unmapped.get(family) ?? 0) + 1);
       return [];
     }
-    const sku = row[skuColumn].trim();
+    const sku = skuOf(row);
     // Como os nomes já publicados: sem o ponto final nem o "Ean :789…" que alguns cadastros têm no fim.
     const name = (row[nameColumn] ?? "").replace(/\s*Ean\s*:\s*\d+\s*$/i, "").replace(/[.\s]+$/, "");
-    return name ? [{ departamento: department, codigo: sku, nome: name, imagem: photoUrl(sku) }] : [];
+    if (!name) return [];
+    return [{ departamento: department, codigo: sku, nome: name, imagem: image }];
   });
   siteRows.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { numeric: true }));
 
   await writeFile(SITE_PRODUCTS_FILE, [
     `// Gerado por \`npm run photos:check -- ${basename(inputPath)} --site\` em ${new Date().toLocaleDateString("pt-BR")}: os produtos`,
-    "// da exportação do sistema que têm foto, já com o departamento do site. Não edite à mão: rode o",
-    "// script de novo com a exportação nova. Um código que também está na planilha (PRODUCTS_CSV_URL)",
-    "// aparece uma vez só, como está na planilha.",
+    "// da exportação do sistema que têm foto (no servidor de fotos ou na loja antiga), já com o departamento",
+    "// do site. Não edite à mão: rode o script de novo com a exportação nova. Um código que também está na",
+    "// planilha (PRODUCTS_CSV_URL) aparece uma vez só, como está na planilha.",
     "export const systemProductRows: Record<string, string>[] = [",
     ...siteRows.map((row) => `  ${JSON.stringify(row)},`),
     "];",

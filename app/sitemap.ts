@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 import { departments } from "./departamentos/departments";
+import { isDemoProduct, productPath } from "./lib/product-page";
+import { getDepartmentsWithLiveProducts } from "./lib/products-source.server";
 import { getSiteUrl } from "./lib/site-config";
 import { storeSlug, stores } from "./lojas/stores";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -26,5 +28,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...departmentRoutes, ...storeRoutes];
+  // Um produto que está em dois departamentos tem uma página só.
+  const productPaths = new Set((await getDepartmentsWithLiveProducts()).flatMap((department) => department.products.filter((product) => !isDemoProduct(product)).map(productPath)));
+  const productRoutes: MetadataRoute.Sitemap = [...productPaths].map((path) => ({ url: `${base}${path}`, changeFrequency: "weekly", priority: 0.6 }));
+
+  return [...staticRoutes, ...departmentRoutes, ...storeRoutes, ...productRoutes];
 }
