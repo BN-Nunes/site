@@ -686,8 +686,12 @@ test("every system product has a description, the sheet's own description wins, 
     { codigo: "1", nome: "Da planilha", descricao: "Escrita na planilha" },
     { codigo: "2", nome: "Sem descrição" },
     { codigo: "3", descricao: "" },
-  ], new Map([["1", "Do CSV"], ["2", "Do CSV"], ["3", "Do CSV"]]));
-  assert.deepEqual(filled.map((row) => row.descricao), ["Escrita na planilha", "Do CSV", ""]);
+    // Como a planilha de hoje: sem coluna "nome", o nome do produto está em "DESCRIÇÃO".
+    { "CÓDIGO": "4", "DESCRIÇÃO": "NOME NA PLANILHA", DEPARTAMENTO: "Decoração" },
+  ], new Map([["1", "Do CSV"], ["2", "Do CSV"], ["3", "Do CSV"], ["4", "Do CSV"]]));
+  assert.deepEqual(filled.slice(0, 3).map((row) => row.descricao), ["Escrita na planilha", "Do CSV", ""]);
+  const fromSheet = mapCsvRowsToDepartments([filled[3]], departments).find((department) => department.slug === "decoracao").products[0];
+  assert.deepEqual([fromSheet.name, fromSheet.description], ["NOME NA PLANILHA", "Do CSV"]);
 
   const catalog = mapCsvRowsToDepartments(withDescriptions(systemProductRows, descriptions), departments);
   const product = catalog.find((department) => department.slug === "festas-tematicas").products.find((candidate) => candidate.name.startsWith("FANTASIA INFANTIL PALHACO"));
