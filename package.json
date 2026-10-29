@@ -13,7 +13,8 @@
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "db:import-catalog": "node --env-file=.env.local --experimental-strip-types scripts/import-catalog-to-supabase.ts"
+    "db:import-catalog": "node --env-file=.env.local --experimental-strip-types scripts/import-catalog-to-supabase.ts",
+    "photos:check": "node --experimental-strip-types scripts/check-product-photos.ts"
   },
   "dependencies": {
     "@fontsource-variable/baloo-2": "^5.3.0",

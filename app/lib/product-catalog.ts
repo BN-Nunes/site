@@ -42,6 +42,12 @@ function toProduct(row: Record<string, string>, departmentSlug: string): Product
   };
 }
 
+/** Linhas da planilha seguidas das linhas do sistema cujo código a planilha ainda não tem: a planilha manda no produto que as duas trazem. */
+export function mergeCatalogRows(sheetRows: Record<string, string>[], systemRows: Record<string, string>[]): Record<string, string>[] {
+  const sheetSkus = new Set(sheetRows.map((row) => pick(row, "sku", "codigo")).filter(Boolean));
+  return [...sheetRows, ...systemRows.filter((row) => !sheetSkus.has(pick(row, "sku", "codigo")))];
+}
+
 /**
  * Mescla linhas de uma planilha de produtos nos departamentos existentes, casando
  * a coluna "departamento" pelo nome (sem diferenciar maiúsculas/acentos). Departamentos

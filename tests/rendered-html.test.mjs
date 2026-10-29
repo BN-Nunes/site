@@ -7,9 +7,10 @@ import { clampQuantity } from "../app/lib/cart-quantity.ts";
 import { serializeJsonLd } from "../app/lib/json-ld.ts";
 import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
 import { parseCsv } from "../app/lib/csv.ts";
-import { mapCsvRowsToDepartments } from "../app/lib/product-catalog.ts";
+import { mapCsvRowsToDepartments, mergeCatalogRows } from "../app/lib/product-catalog.ts";
 import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../app/lib/department-listing.ts";
 import { departments } from "../app/departamentos/departments.ts";
+import { systemProductRows } from "../app/departamentos/system-products.ts";
 import { getStore, storeHoursRows, storeSlug, stores } from "../app/lojas/stores.ts";
 import { formatPhoneNumber, storeMapEmbedUrl, storeMapsUrl, storePhoneLink, storeWhatsappLink } from "../app/lib/store-contact.ts";
 import { buildQuoteEvent } from "../app/lib/quote-events.ts";
@@ -98,7 +99,8 @@ test("every page shares the same header (search, cart, nav) and footer", async (
 test("the search page lists matching products from the catalog", async () => {
   const { status, html } = await render("/busca?q=copos");
   assert.equal(status, 200);
-  assert.match(html, /Kit Descartáveis Coloridos/);
+  const cup = systemProductRows.find((row) => /^COPO [A-ZÀ-Ú0-9 ]+$/.test(row.nome));
+  assert.ok(html.includes(cup.nome), `expected "${cup.nome}" in the results`);
   assert.match(html, /noindex/);
 });
 
@@ -490,7 +492,7 @@ test("the department listing shows 24 products at a time, and its search filters
 });
 
 test("department pages load products 24 at a time, search within the department and keep photos server-rendered", async (t) => {
-  const rows = Array.from({ length: 60 }, (_, index) => `${100000 + index},${index % 3 === 0 ? "CACHEPOT VERDE" : "FITA CETIM AZUL"} ${index},Decoração,https://fotos.example/pr${100000 + index}.webp`);
+  const rows = Array.from({ length: 60 }, (_, index) => `${100000 + index},${index % 3 === 0 ? "CACHEPOT VERDE" : "FITA CETIM AZUL"} ${index},Ofertas,https://fotos.example/pr${100000 + index}.webp`);
   const original = process.env.PRODUCTS_CSV_URL;
   t.after(() => { if (original === undefined) delete process.env.PRODUCTS_CSV_URL; else process.env.PRODUCTS_CSV_URL = original; });
   process.env.PRODUCTS_CSV_URL = `data:text/csv;charset=utf-8,${encodeURIComponent(["CÓDIGO,DESCRIÇÃO,DEPARTAMENTO,URL IMAGEM", ...rows].join("\n"))}`;
@@ -498,53 +500,79 @@ test("department pages load products 24 at a time, search within the department 
   const cards = (html) => html.match(/<article class="product-card">/g)?.length ?? 0;
   const canonical = (html) => html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
 
-  const first = (await render("/departamentos/decoracao")).html.replaceAll("<!-- -->", "");
+  const first = (await render("/departamentos/ofertas")).html.replaceAll("<!-- -->", "");
   assert.equal(cards(first), 24);
   assert.equal(first.match(/"@type":"Product"/g)?.length, 24, "only the products on screen get Product JSON-LD");
   assert.match(first, /<img src="https:\/\/fotos\.example\/pr100000\.webp" alt="CACHEPOT VERDE 0"/);
-  assert.match(first, /<form[^>]*role="search"[^>]*action="\/departamentos\/decoracao"/);
+  assert.match(first, /<form[^>]*role="search"[^>]*action="\/departamentos\/ofertas"/);
   assert.match(first, /name="busca"/);
   assert.match(first, /Mostrando 24 de 60 produtos/);
-  assert.match(first, /href="\/departamentos\/decoracao\?pagina=2"/);
-  assert.equal(canonical(first), "https://impakto-festas.vercel.app/departamentos/decoracao");
+  assert.match(first, /href="\/departamentos\/ofertas\?pagina=2"/);
+  assert.equal(canonical(first), "https://impakto-festas.vercel.app/departamentos/ofertas");
   assert.doesNotMatch(first, /noindex/);
 
-  const second = (await render("/departamentos/decoracao?pagina=2")).html.replaceAll("<!-- -->", "");
+  const second = (await render("/departamentos/ofertas?pagina=2")).html.replaceAll("<!-- -->", "");
   assert.equal(cards(second), 48);
-  assert.match(second, /href="\/departamentos\/decoracao\?pagina=3"/);
-  assert.equal(canonical(second), "https://impakto-festas.vercel.app/departamentos/decoracao?pagina=2");
+  assert.match(second, /href="\/departamentos\/ofertas\?pagina=3"/);
+  assert.equal(canonical(second), "https://impakto-festas.vercel.app/departamentos/ofertas?pagina=2");
 
-  for (const path of ["/departamentos/decoracao?pagina=3", "/departamentos/decoracao?pagina=99"]) {
+  for (const path of ["/departamentos/ofertas?pagina=3", "/departamentos/ofertas?pagina=99"]) {
     const { status, html } = await render(path);
     assert.equal(status, 200);
     assert.equal(cards(html), 60, path);
     assert.match(html.replaceAll("<!-- -->", ""), /Mostrando 60 de 60 produtos/);
     assert.doesNotMatch(html, /Carregar mais produtos/);
-    assert.equal(canonical(html), "https://impakto-festas.vercel.app/departamentos/decoracao?pagina=3");
+    assert.equal(canonical(html), "https://impakto-festas.vercel.app/departamentos/ofertas?pagina=3");
   }
 
-  const green = (await render("/departamentos/decoracao?busca=cachepot+verde")).html.replaceAll("<!-- -->", "");
+  const green = (await render("/departamentos/ofertas?busca=cachepot+verde")).html.replaceAll("<!-- -->", "");
   assert.equal(cards(green), 20);
   assert.match(green, /20 produtos encontrados para <strong>“cachepot verde”<\/strong>/);
   assert.match(green, /value="cachepot verde"/);
-  assert.match(green, /href="\/departamentos\/decoracao"[^>]*>Limpar busca/);
+  assert.match(green, /href="\/departamentos\/ofertas"[^>]*>Limpar busca/);
   assert.doesNotMatch(green, /Carregar mais produtos/);
   assert.match(green, /<meta name="robots" content="noindex, ?follow"/);
-  assert.equal(canonical(green), "https://impakto-festas.vercel.app/departamentos/decoracao");
+  assert.equal(canonical(green), "https://impakto-festas.vercel.app/departamentos/ofertas");
 
-  const blue = (await render("/departamentos/decoracao?busca=azul&pagina=1")).html.replaceAll("<!-- -->", "");
+  const blue = (await render("/departamentos/ofertas?busca=azul&pagina=1")).html.replaceAll("<!-- -->", "");
   assert.equal(cards(blue), 24);
-  assert.match(blue, /href="\/departamentos\/decoracao\?busca=azul&amp;pagina=2"/);
+  assert.match(blue, /href="\/departamentos\/ofertas\?busca=azul&amp;pagina=2"/);
 
-  const none = (await render("/departamentos/decoracao?busca=bal%C3%A3o")).html.replaceAll("<!-- -->", "");
+  const none = (await render("/departamentos/ofertas?busca=bal%C3%A3o")).html.replaceAll("<!-- -->", "");
   assert.equal(cards(none), 0);
   assert.match(none, /Nenhum produto encontrado para <strong>“balão”<\/strong>/);
   assert.match(none, /href="\/busca\?q=bal%C3%A3o"/);
 
-  // Departamento com poucos produtos (os 2 de exemplo): sem busca e sem "carregar mais".
-  const small = (await render("/departamentos/confeitaria")).html;
-  assert.equal(cards(small), 2);
+  // Departamento com poucos produtos: sem busca e sem "carregar mais".
+  const papelaria = systemProductRows.filter((row) => row.departamento === "Papelaria").length;
+  assert.ok(papelaria > 0 && papelaria <= PRODUCTS_PER_PAGE, "Papelaria serve de departamento pequeno enquanto tiver até 24 produtos");
+  const small = (await render("/departamentos/papelaria")).html;
+  assert.equal(cards(small), papelaria);
   assert.doesNotMatch(small, /name="busca"|Mostrando \d+ de/);
+});
+
+test("the system export's products fill their departments, and the sheet wins when both have a code", async () => {
+  const sheet = [
+    { "CÓDIGO": "246346", "DESCRIÇÃO": "BALÃO DA PLANILHA", DEPARTAMENTO: "Decoração", "URL IMAGEM": "https://fotos.example/planilha.webp" },
+    { "CÓDIGO": "1", "DESCRIÇÃO": "SÓ NA PLANILHA", DEPARTAMENTO: "Decoração", "URL IMAGEM": "" },
+  ];
+  const system = [
+    { departamento: "Balões", codigo: "246346", nome: "BALÃO DO SISTEMA", imagem: "https://fotos.example/sistema.webp" },
+    { departamento: "Balões", codigo: "2", nome: "SÓ NO SISTEMA", imagem: "" },
+  ];
+  assert.deepEqual(mergeCatalogRows(sheet, system), [...sheet, system[1]]);
+  const merged = mapCsvRowsToDepartments(mergeCatalogRows(sheet, system), departments);
+  assert.deepEqual(merged.find((department) => department.slug === "decoracao").products.map((product) => product.name), ["BALÃO DA PLANILHA", "SÓ NA PLANILHA"]);
+  assert.deepEqual(merged.find((department) => department.slug === "baloes").products.map((product) => product.name), ["SÓ NO SISTEMA"]);
+
+  // Sem planilha configurada (como nos testes), os departamentos mostram os produtos do sistema no lugar dos de exemplo.
+  const balloons = systemProductRows.filter((row) => row.departamento === "Balões");
+  const html = (await render("/departamentos/baloes")).html.replaceAll("<!-- -->", "");
+  assert.match(html, new RegExp(`Mostrando 24 de ${balloons.length} produtos`));
+  assert.ok(html.includes(`src="${balloons[0].imagem}"`));
+  assert.doesNotMatch(html, /Buquê de Balões Coloridos/);
+  // Ofertas não tem família no sistema: continua com os produtos de exemplo.
+  assert.match((await render("/departamentos/ofertas")).html, /Combo Festa Colorida/);
 });
 
 test("no private key appears in the client bundle", async () => {

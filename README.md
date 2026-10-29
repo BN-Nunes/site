@@ -39,6 +39,7 @@ npm run dev                  # http://localhost:3000 (use --port para mudar)
 | `npm test` | build + testes (`tests/rendered-html.test.mjs`): renderiza as rotas pelo Worker e testa as funções puras de `app/lib/` |
 | `npm run build:vercel` | build usado no deploy da Vercel |
 | `npm run db:import-catalog` | copia o catálogo estático para as tabelas `departments`/`products` do Supabase |
+| `npm run photos:check -- arquivo.csv` | testa no servidor de fotos quais SKUs de uma exportação do sistema têm foto e grava `arquivo-fotos.csv` com as colunas FOTO e URL IMAGEM; com `--site`, também regrava os produtos do sistema que o site mostra (`app/departamentos/system-products.ts`) |
 
 ## Variáveis de ambiente
 
@@ -46,7 +47,7 @@ Veja `.env.example`. Resumo:
 
 - `NEXT_PUBLIC_SITE_URL` — URL canônica (metadata, sitemap, Open Graph).
 - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — chave **pública** do Supabase, usada no navegador.
-- `PRODUCTS_CSV_URL` — planilha publicada como CSV com os produtos (colunas em `catalogo/modelo-catalogo.csv`). Sem ela, ou se a planilha falhar, o site usa os produtos de `app/departamentos/departments.ts`.
+- `PRODUCTS_CSV_URL` — planilha publicada como CSV com os produtos (colunas em `catalogo/modelo-catalogo.csv`). O site soma a ela os produtos com foto da exportação do sistema (`app/departamentos/system-products.ts`, gerado por `npm run photos:check -- exportacao.csv --site`, que escolhe o departamento pela FAMÍLIA); um código que está nos dois aparece uma vez, como está na planilha. Sem a planilha, ou se ela falhar, ficam só os do sistema; departamento sem nenhum produto mostra os de exemplo de `app/departamentos/departments.ts`.
 - `SUPABASE_SERVICE_ROLE_KEY` — **secreta**, só para o script de importação. Nunca use prefixo `VITE_`.
 
 ## Onde fica cada coisa
