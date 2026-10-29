@@ -48,6 +48,11 @@ export function mergeCatalogRows(sheetRows: Record<string, string>[], systemRows
   return [...sheetRows, ...systemRows.filter((row) => !sheetSkus.has(pick(row, "sku", "codigo")))];
 }
 
+/** Linhas sem os códigos escondidos do site. */
+export function withoutCodes(rows: Record<string, string>[], codes: Set<string>): Record<string, string>[] {
+  return rows.filter((row) => !codes.has(pick(row, "sku", "codigo") ?? ""));
+}
+
 /** Preenche a descrição pelo código nas linhas que não têm a sua: a descrição da planilha vale mais. */
 export function withDescriptions(rows: Record<string, string>[], descriptions: Map<string, string>): Record<string, string>[] {
   return rows.map((row) => {

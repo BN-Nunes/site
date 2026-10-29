@@ -7,7 +7,8 @@ import { clampQuantity } from "../app/lib/cart-quantity.ts";
 import { serializeJsonLd } from "../app/lib/json-ld.ts";
 import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
 import { parseCsv } from "../app/lib/csv.ts";
-import { mapCsvRowsToDepartments, mergeCatalogRows, withDescriptions } from "../app/lib/product-catalog.ts";
+import { mapCsvRowsToDepartments, mergeCatalogRows, withDescriptions, withoutCodes } from "../app/lib/product-catalog.ts";
+import { hiddenProductCodes } from "../app/departamentos/hidden-products.ts";
 import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../app/lib/department-listing.ts";
 import { findProduct, isDemoProduct, productPath, similarProducts } from "../app/lib/product-page.ts";
 import { departments } from "../app/departamentos/departments.ts";
@@ -638,7 +639,7 @@ test("product pages are addressed by name and code, an old name still finds the 
 
 test("a product page shows the product, redirects an old name, and every card and the sitemap link to it", async () => {
   const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const catalog = mapCsvRowsToDepartments(systemProductRows, departments);
+  const catalog = mapCsvRowsToDepartments(withoutCodes(systemProductRows, hiddenProductCodes), departments);
   const themed = catalog.find((department) => department.slug === "festas-tematicas");
   const product = themed.products.find((candidate) => candidate.name.startsWith("FANTASIA INFANTIL PALHACO"));
   const path = productPath(product);
@@ -674,6 +675,19 @@ test("a product page shows the product, redirects an old name, and every card an
   assert.ok(!sitemap.html.includes(productPath(demo)), "demo products stay out of the sitemap");
   const realProducts = new Set(catalog.flatMap((department) => department.products.filter((candidate) => !isDemoProduct(candidate)).map(productPath)));
   assert.equal(sitemap.html.match(/<loc>[^<]*\/produtos\//g)?.length, realProducts.size);
+});
+
+test("hidden products leave the site: no page, no search result, no sitemap entry", async () => {
+  assert.deepEqual(withoutCodes([{ "CÓDIGO": "1" }, { codigo: "2" }, { sku: "3" }], new Set(["1", "3"])), [{ codigo: "2" }]);
+  const hidden = systemProductRows.filter((row) => hiddenProductCodes.has(row.codigo));
+  assert.ok(hidden.length > 0, "some hidden products come from the system export");
+  const sitemap = (await render("/sitemap.xml")).html;
+  for (const row of hidden) {
+    const path = productPath({ id: "", name: row.nome, sku: row.codigo });
+    assert.equal((await render(path)).status, 404, `${path} should be gone`);
+    assert.ok(!(await render(`/busca?q=${row.codigo}`)).html.replaceAll("<!-- -->", "").includes(`Cód. ${row.codigo}`), `${row.codigo} in search`);
+    assert.ok(!sitemap.includes(path), `${path} in the sitemap`);
+  }
 });
 
 test("every system product has a description, the sheet's own description wins, and it shows on the product page but not on the card", async () => {
