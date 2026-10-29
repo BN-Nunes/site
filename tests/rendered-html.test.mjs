@@ -7,7 +7,7 @@ import { clampQuantity } from "../app/lib/cart-quantity.ts";
 import { serializeJsonLd } from "../app/lib/json-ld.ts";
 import { haversineDistanceKm, sortByDistance, formatDistanceKm } from "../app/lib/geolocation.ts";
 import { parseCsv } from "../app/lib/csv.ts";
-import { mapCsvRowsToDepartments, mergeCatalogRows } from "../app/lib/product-catalog.ts";
+import { mapCsvRowsToDepartments, mergeCatalogRows, withDescriptions } from "../app/lib/product-catalog.ts";
 import { departmentListingHref, listDepartmentProducts, PRODUCTS_PER_PAGE, readPageParam } from "../app/lib/department-listing.ts";
 import { findProduct, isDemoProduct, productPath, similarProducts } from "../app/lib/product-page.ts";
 import { departments } from "../app/departamentos/departments.ts";
@@ -469,6 +469,8 @@ test("parseCsv handles quoted fields with commas, escaped quotes and a header-on
   assert.deepEqual(parseCsv(csv), [{ departamento: "Balões", nome: "Kit A", descricao: 'Tem vírgula, aspas "duplas" e tudo' }]);
   assert.deepEqual(parseCsv("departamento,nome\n"), []);
   assert.deepEqual(parseCsv(""), []);
+  // CSV salvo pelo Excel em português: BOM no começo e ";" como separador.
+  assert.deepEqual(parseCsv('﻿codigo;descricao\r\n1;"Com ; e ""aspas"""\r\n', ";"), [{ codigo: "1", descricao: 'Com ; e "aspas"' }]);
 });
 
 test("mapCsvRowsToDepartments matches department names loosely, skips bad rows, allows a missing price, and falls back per department", () => {
@@ -672,6 +674,29 @@ test("a product page shows the product, redirects an old name, and every card an
   assert.ok(!sitemap.html.includes(productPath(demo)), "demo products stay out of the sitemap");
   const realProducts = new Set(catalog.flatMap((department) => department.products.filter((candidate) => !isDemoProduct(candidate)).map(productPath)));
   assert.equal(sitemap.html.match(/<loc>[^<]*\/produtos\//g)?.length, realProducts.size);
+});
+
+test("every system product has a description, the sheet's own description wins, and it shows on the product page but not on the card", async () => {
+  const rows = parseCsv(await readFile(new URL("../catalogo/descricoes.csv", import.meta.url), "utf8"), ";");
+  const descriptions = new Map(rows.map((row) => [row.codigo, row.descricao]));
+  assert.equal(descriptions.size, rows.length, "one row per code");
+  for (const row of systemProductRows) assert.ok(descriptions.get(row.codigo), `${row.codigo} ${row.nome} has no description`);
+
+  const filled = withDescriptions([
+    { codigo: "1", nome: "Da planilha", descricao: "Escrita na planilha" },
+    { codigo: "2", nome: "Sem descrição" },
+    { codigo: "3", descricao: "" },
+  ], new Map([["1", "Do CSV"], ["2", "Do CSV"], ["3", "Do CSV"]]));
+  assert.deepEqual(filled.map((row) => row.descricao), ["Escrita na planilha", "Do CSV", ""]);
+
+  const catalog = mapCsvRowsToDepartments(withDescriptions(systemProductRows, descriptions), departments);
+  const product = catalog.find((department) => department.slug === "festas-tematicas").products.find((candidate) => candidate.name.startsWith("FANTASIA INFANTIL PALHACO"));
+  const page = (await render(productPath(product))).html;
+  assert.ok(page.includes(`<p class="product-detail-description">${product.description}</p>`), "description on the product page");
+  assert.ok(page.includes(`<meta name="description" content="${product.description}"`), "description for Google");
+  const listing = (await render("/departamentos/festas-tematicas?pagina=99")).html;
+  const card = listing.split("<article class=\"product-card\">").find((chunk) => chunk.includes(`href="${productPath(product)}"`))?.split("</article>")[0];
+  assert.ok(card && !card.includes(product.description), "not on the card");
 });
 
 test("no private key appears in the client bundle", async () => {

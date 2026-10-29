@@ -36,10 +36,19 @@ export function searchTerms(normalizedQuery: string): string[] {
     .map((term) => (term.length > 3 && term.endsWith("s") ? term.slice(0, -1) : term));
 }
 
-function scoreFields(terms: string[], fields: Array<{ value: string; weight: number }>): number {
-  const normalizedFields = fields.map((field) => ({ ...field, value: normalize(field.value) }));
+/** Termos que não contam na descrição dos produtos: "festa" está em quase todas e casaria o catálogo inteiro. */
+const DESCRIPTION_NOISE = new Set(["festa"]);
+
+type SearchField = { value: string; weight: number; ignore?: Set<string> };
+
+/** Só palavras com pontuação virando espaço, com um espaço na frente: " balao metalizado 16". */
+const words = (value: string) => ` ${normalize(value).replace(/[^a-z0-9]+/g, " ").trim()}`;
+
+/** O termo conta no começo de uma palavra: "copo" acha "copos", mas "vela" não acha "revelação". */
+function scoreFields(terms: string[], fields: SearchField[]): number {
+  const normalizedFields = fields.map((field) => ({ ...field, value: words(field.value) }));
   return terms.reduce(
-    (score, term) => score + normalizedFields.reduce((termScore, field) => termScore + (field.value.includes(term) ? field.weight : 0), 0),
+    (score, term) => score + normalizedFields.reduce((termScore, field) => termScore + (!field.ignore?.has(term) && field.value.includes(words(term)) ? field.weight : 0), 0),
     0,
   );
 }
@@ -50,15 +59,15 @@ export function departmentScore(department: Department, normalizedQuery: string)
     { value: departmentAliases[department.slug]?.join(" ") ?? "", weight: 11 },
     { value: department.productTypes.join(" "), weight: 9 },
     { value: department.products.map((product) => `${product.name} ${product.sku ?? ""}`).join(" "), weight: 8 },
-    { value: department.products.map((product) => product.description).join(" "), weight: 4 },
+    { value: department.products.map((product) => product.description).join(" "), weight: 4, ignore: DESCRIPTION_NOISE },
     { value: `${department.shortDescription} ${department.description}`, weight: 2 },
   ]);
 }
 
-function productFields(product: Product): Array<{ value: string; weight: number }> {
+function productFields(product: Product): SearchField[] {
   return [
     { value: `${product.name} ${product.sku ?? ""}`, weight: 10 },
-    { value: product.description, weight: 4 },
+    { value: product.description, weight: 4, ignore: DESCRIPTION_NOISE },
   ];
 }
 

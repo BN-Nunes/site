@@ -19,8 +19,8 @@ export function ProductCard({ product, department, showDepartment = false }: { p
         {showDepartment
           ? <Link className="product-department" href={`/departamentos/${department.slug}`}>{department.name}</Link>
           : <span className={product.available ? "product-status" : "product-status is-unavailable"}>{product.available ? "Disponível" : "Indisponível"}</span>}
+        {/* A descrição fica na página do produto: o nome já ocupa até 4 linhas no card. */}
         <h3><Link className="product-card-link" href={href}>{product.name}</Link></h3>
-        {product.description && <p>{product.description}</p>}
         {product.sku && <small className="product-sku">Cód. {product.sku}</small>}
         {product.price && <strong>{product.price}</strong>}
         <AddToCartButton product={product} department={department.name} />

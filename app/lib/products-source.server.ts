@@ -1,19 +1,21 @@
 import { departments as staticDepartments, type Department } from "../departamentos/departments.ts";
 import { systemProductRows } from "../departamentos/system-products.ts";
 import { parseCsv } from "./csv.ts";
-import { mapCsvRowsToDepartments, mergeCatalogRows } from "./product-catalog.ts";
+import { mapCsvRowsToDepartments, mergeCatalogRows, withDescriptions } from "./product-catalog.ts";
+import { productDescriptions } from "./product-descriptions.ts";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 
 let cache: { expiresAt: number; departments: Department[] } | null = null;
 
-const withoutSheet = mapCsvRowsToDepartments(systemProductRows, staticDepartments);
+const withoutSheet = mapCsvRowsToDepartments(withDescriptions(systemProductRows, productDescriptions), staticDepartments);
 
 /**
  * Departamentos com os produtos da planilha configurada em PRODUCTS_CSV_URL (com
  * cache de alguns minutos) mais os produtos com foto da exportação do sistema
- * (system-products.ts). Sem a variável configurada, ou se a busca/planilha falhar,
+ * (system-products.ts), com as descrições de catalogo/descricoes.csv nos que não
+ * trazem a sua. Sem a variável configurada, ou se a busca/planilha falhar,
  * ficam só os do sistema — o catálogo nunca fica fora do ar por causa de uma
  * planilha indisponível ou mal formatada. Departamento sem nenhum dos dois mostra
  * os produtos de exemplo de departments.ts.
@@ -29,7 +31,7 @@ export async function getDepartmentsWithLiveProducts(): Promise<Department[]> {
     if (!response.ok) throw new Error(`Planilha de produtos respondeu ${response.status}`);
 
     const rows = parseCsv(await response.text());
-    const merged = mapCsvRowsToDepartments(mergeCatalogRows(rows, systemProductRows), staticDepartments);
+    const merged = mapCsvRowsToDepartments(withDescriptions(mergeCatalogRows(rows, systemProductRows), productDescriptions), staticDepartments);
     cache = { expiresAt: Date.now() + CACHE_TTL_MS, departments: merged };
     return merged;
   } catch (error) {

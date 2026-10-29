@@ -48,6 +48,14 @@ export function mergeCatalogRows(sheetRows: Record<string, string>[], systemRows
   return [...sheetRows, ...systemRows.filter((row) => !sheetSkus.has(pick(row, "sku", "codigo")))];
 }
 
+/** Preenche a descrição pelo código nas linhas que não têm a sua: a descrição da planilha vale mais. Linha sem nome fica como está, para a descrição não virar o nome. */
+export function withDescriptions(rows: Record<string, string>[], descriptions: Map<string, string>): Record<string, string>[] {
+  return rows.map((row) => {
+    const description = descriptions.get(pick(row, "sku", "codigo") ?? "");
+    return description && pick(row, "nome") && !pick(row, "descricao") ? { ...row, descricao: description } : row;
+  });
+}
+
 /**
  * Mescla linhas de uma planilha de produtos nos departamentos existentes, casando
  * a coluna "departamento" pelo nome (sem diferenciar maiúsculas/acentos). Departamentos

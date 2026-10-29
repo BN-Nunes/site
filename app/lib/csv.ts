@@ -1,6 +1,6 @@
-/** Parser de CSV (RFC 4180): lida com campos entre aspas, vírgulas e quebras de linha dentro deles, e aspas escapadas (""). */
-export function parseCsv(text: string): Record<string, string>[] {
-  const source = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+/** Parser de CSV (RFC 4180): lida com campos entre aspas, separadores e quebras de linha dentro deles, e aspas escapadas (""). O separador padrão é a vírgula; o CSV do Excel em português usa ";". */
+export function parseCsv(text: string, delimiter = ","): Record<string, string>[] {
+  const source = text.replace(/^﻿/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
@@ -21,7 +21,7 @@ export function parseCsv(text: string): Record<string, string>[] {
     }
 
     if (char === '"') inQuotes = true;
-    else if (char === ",") { row.push(field); field = ""; }
+    else if (char === delimiter) { row.push(field); field = ""; }
     else if (char === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
     else field += char;
   }
